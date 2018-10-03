@@ -1,0 +1,56 @@
+//import std;
+//import math;
+//@main = function(value) {
+    //@assume value >= 2;
+    //isPrime -> 2 -> @true;
+    //vsqrt = math.sqrt(value);
+    //checkMod = function(value, mod) {
+        //@self -> (@any, 1) -> @false;
+    //} -> std.choose(std.mod(value, mod) = 0, @true, checkMod(value, @pred mod));
+//} -> checkMod(value, @succ vsqrt);
+
+OUT
+    INVOKE
+        FUNC
+            value
+            BRANCH
+                COND
+                    EQ
+                    value
+                    2
+                TRUE
+                INVOKE
+                    FUNC -> checkMod
+                        TUPLE
+                            2
+                            value
+                            mod
+                        BRANCH
+                            COND
+                                EQ
+                                mod
+                                1
+                            FALSE
+                            BRANCH
+                                COND
+                                    EQ
+                                    MOD
+                                        value
+                                        mod
+                                    0
+                                TRUE
+                                INVOKE
+                                    checkMod
+                                    TUPLE
+                                        2
+                                        value
+                                        PRED
+                                            mod
+                    TUPLE
+                        2
+                        value
+                        SUCC
+                            SQRT
+                                value
+
+

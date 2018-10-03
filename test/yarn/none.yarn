@@ -1,0 +1,7 @@
+// Empty program that does nothing
+
+[GLOBAL]
+[TEXT]
+
+    :INITIALIZE
+    RETN;

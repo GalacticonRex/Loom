@@ -1,0 +1,28 @@
+foo = (a int, b int) -> bar(b, a, b, a);
+
+// compiler error, b is not guaranteed non-zero
+func3 = (a, b) {
+    c = a / b;
+} -> c;
+
+// Assume that b is non-zero. Responsibility for this
+// assumption is passed to the caller.
+func2v1 = (a, b) {
+    @assume (b!=0);
+} -> a / b;
+
+// Make all assumptions necessary to make this function
+// work. There is only one, but any and all assumptions
+// are covered by this clause.
+func2v2 = (a, b) {
+    @assume *;
+} -> a / b; 
+
+// Functions without a statement sequence automatically
+// make all assumptions necessary to compile.
+func2v3 = (a, b) -> a / b; 
+func1 = (a) -> func2v3(a, a * a);
+
+func1(3); // OK
+func1(0); // Fails because argument a is zero
+func1(::int("0")) // Fails because argument a is not guaranteed non-zero

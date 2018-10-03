@@ -1,0 +1,19 @@
+import builtin *;
+import control *;
+import console;
+
+// Retrieve the first element of a tuple
+// Fully generic so you can use it with ANY tuple
+first = tuple -> {
+    (head | tail) = tuple;
+} head;
+
+some_tuple = (1, "two", 3.0, cow -> cow*cow);
+
+// using the "first" function
+value = first some_tuple;
+
+// another way to get the tuple head
+(value|?) = some_tuple;
+
+console.log value;

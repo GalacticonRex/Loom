@@ -1,0 +1,111 @@
+// Generates prime values on a single thread
+// prime_serial <THREAD-COUNT> <MAX-PRIME> 
+
+[GLOBAL]
+
+    NL      "\n";
+    SP      " ";
+    TEST1   "Test range (";
+    TEST2   ", ";
+    TEST3   ")";
+    TEST4   "Primes in range : ";
+    A       "There are ";
+    B       " integers less than ";
+    C       " that are prime.";
+    ERR     "An error occurred, exitting now.";
+    USAGE   "Incorrect number of arguments. Usage is: prime_parallel THREAD-COUNT MAX-PRIME";
+
+[TEXT]
+
+    :INITIALIZE
+    // Interpreter provides a memory block in the (0) slot.
+    // Deep memory accesses (i.e. (0 0) or {0 (0 3))}) are
+    // effectively pointer dereferences:
+    //    (0 0) is the same as @0 -> @0
+    //    {0 (0 3))} is the same as A = @0 -> @3, @(@0 -> A)
+
+    ASSG {8} (0 0); // ARGC
+    JNEQ ::INVALID_ARGS (8) 3; // incorrect number of arguments
+    ASSG {8} {0 (0 3)};
+    SYSC "strtol" (8) {2};
+
+    ASSG {126} {0 (0 2)};
+    SYSC "strtol" (126) {127};
+
+    ASSG {5} (2);
+    DIV  {5} (127);
+
+    ASSG {6} 2;
+    ASSG {7} (5);
+    ADD  {7} (6);
+    ASSG {8} (127);
+    DECR {8};
+
+    ASSG {10} 11;
+
+    FANO {128};
+        JZ   ::MAIN_LOOP_FAIL (8);
+        :MAIN_LOOP
+            RPCS {128} ::ISPRIME_RANGE_FAST {(10)} (6) (7);
+            ADD {6} (5);
+            ADD {7} (5);
+            DECR {8};
+            INCR {10};
+        JNZ  ::MAIN_LOOP (8);
+        :MAIN_LOOP_FAIL 
+        CALL ::ISPRIME_RANGE_FAST {(10)} (6) (2);
+    FANI {128};
+
+    ASSG {9} 0;
+    :SUMMATION_LOOP
+        ADD  {9} ((10));
+        DECR {10};
+    JGR  ::SUMMATION_LOOP (10) 10;
+
+    SYSC "print_string" [A];
+    SYSC "print_int" (9);
+    SYSC "print_string" [B];
+    SYSC "print_int" (2);
+    SYSC "print_string" [C];
+    SYSC "print_string" [NL];
+
+    RETN;
+
+    :ISPRIME_RANGE_FAST // (return-location, int-lower, int-higher)
+        SYSC "test_primes" (0) (1) (2);
+    RETN;
+
+    :ISPRIME_RANGE // (return-location, int-lower, int-higher)
+        ASSG {3} (1);
+        :ISPRIME_RANGE_LOOP
+        CALL ::ISPRIME {4} (3);
+        INCR {3};
+        JLS  ::ISPRIME_RANGE_LOOP (3) (2);
+        ASSG (0) (4);
+    RETN;
+
+    :ISPRIME // (return-location, int-to-check)
+        ASSG {5} (1);    // (5) will be our maximum check value
+        SYSC "sqrt" {5}; // Replace (5) with its square root
+        ASSG {6} 2;      // (6) will be our iterator
+        JGR  ::ISPRIME_SUCCESS (6) (5);
+        :ISPRIME_LOOP
+            ASSG {7} (1);
+            MOD  {7} (6);
+            JZ   ::ISPRIME_FAIL (7);
+            INCR {6};
+        JLSE ::ISPRIME_LOOP (6) (5);
+        :ISPRIME_SUCCESS
+        INCR (0);
+    :ISPRIME_FAIL
+    RETN;
+
+    :FATAL_ERROR
+    SYSC "print_string" [ERR];
+    SYSC "print_string" [NL];
+    RETN;
+
+    :INVALID_ARGS
+    SYSC "print_string" [USAGE];
+    SYSC "print_string" [NL];
+    RETN;

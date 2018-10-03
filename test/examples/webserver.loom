@@ -1,0 +1,29 @@
+import builtin *;
+import control *;
+import map;
+import webserver;
+import html;
+
+// webserver.recv = :X -> :(webserver.base_recv | data X);
+// webserver.send = :X -> :(webserver.base_send | data X);
+
+:webDB = (users [string], posts map.map(string, [string]));
+
+serve {webserver.recv(webDB) -> webserver.send(webDB)};
+serve -> (recv | type="GET", path="users") -> {
+    html_data = 
+        html.html(
+            html.title(
+                "Website users"
+                ),
+            html.p (
+                string.join msg.data.users " "
+                )
+            );
+} (webserver.send.from_recv recv | result = html_data )
+
+main [string] =
+    argv -> {
+        initial_db webDB = (() | users = ["wbrennan", "tloqman"]);
+        service = webserver.start_service("127.0.0.1:80", serve, initial_db);
+    } service.result;

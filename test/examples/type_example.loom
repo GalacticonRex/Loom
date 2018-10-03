@@ -1,0 +1,51 @@
+// Types are sets!
+//
+// A type defines the domain a variable can
+// possess. 
+// 
+// any -- the set of all sets (any is included in itself)
+//
+// int32  -- {x in Z | -2147483648 <= x < 2147483648}
+// int = int32
+//
+// int16  -- {x in Z | -32768 <= x < 32768}
+// short = int16
+//
+// int8   -- {x in Z | -128 <= x < 128}
+// byte = int8
+//
+// char   -- {x in N | 0 <= x < 256}
+// wchar  -- {x in N | 0 <= x < 65536}
+// string -- [char] | [wchar]
+
+// a is declared an int (int32)
+a int = 5;
+
+// b starts as an "any", but is constrainted by the
+// value that is passed to it (a string)
+b = "hello world!";
+
+from1to100 = @set { @set N | 1 <= from1to100 <= 100 };
+
+// this will throw a compile error because 200 is not
+// within the defined range for the set
+c from1to100 = 200;
+
+// sets can be defined implcitly
+// one good example is with array indexing
+
+list [int] = [1, 2, 3, 4, 5, 6];
+
+// the set of valid integers for list indexing
+// NOTE: @self can be used here
+valid = @set { @set N | 0 <= @self < list.length };
+
+i int = 22;
+
+// this will throw a compiler error since there is no
+// guarantee that i is within the set of valid indices
+// for list
+j = list[i];
+
+// this WILL compile because the boundaries are checked
+k = if 0 <= i < list.length then list[i] else 0;

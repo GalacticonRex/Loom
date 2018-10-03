@@ -1,0 +1,27 @@
+// Simple loop
+
+[TEXT]
+
+:INITIALIZE
+
+ASSG {1} [COUNT];
+
+SYSC "print_string" [STR1];
+SYSC "print_int"    (1);
+SYSC "print_string" [STR2];
+
+:LOOP
+SYSC "print_int"    (1);
+SYSC "print_string" [STR2];
+DECR {1};
+JNZ  LOOP (1);
+
+SYSC "print_string" [STR3];
+RETN;
+
+[GLOBAL]
+
+COUNT 10;
+STR1  "Counting down from ";
+STR2  "!\n";
+STR3  "All done!\n";

@@ -1,0 +1,35 @@
+import impl *;
+import control *;
+import std;
+import ds;
+
+bfs = (start, nodes, condition) -> {
+    iteration = (queue, visited, condition) -> {
+        top, @mut queue = queue.pop();
+        @mut top = nodes.find top;
+
+        @mut visited, @mut queue = 
+        if (!visited.contains(top)) (
+            visited.insert(top),
+            for top.adjacent with queue do
+                (adj, q, v) -> 
+                if (condition(top, adj)) [q adj]
+                else [q]
+        ) else (
+            visited, queue
+        );
+    } -> (std.isEmpty(queue)) ? 
+            (visited) : 
+            (iteration(queue, visited, condition))
+} iteration([node], ds.set, condition)
+
+nodes ds.map.instance = ds.map [
+    ("a", (adjacent: ["b"])),
+    ("b", (adjacent: ["c", "d"])),
+    ("c", (adjacent: ["a"])),
+    ("d", (adjacent: ["b", "f"])),
+    ("e", (adjacent: ["f"])),
+    ("f", (adjacent: ["a"])),
+    ];
+
+reachable = bfs("a", nodes, (self, adj)->true)

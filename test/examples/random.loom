@@ -1,0 +1,17 @@
+import impl *;
+import std;
+import console;
+
+@main = {
+
+    values = (i { next = i * 3 + 1; } -> [next @self(next)]) (1);
+    
+    std.loop(
+        list {
+            [value, next] = std.take(list, 2);
+            console.log(value[0], value[1]);
+        } -> next,
+        values
+    )
+    
+} -> 0;

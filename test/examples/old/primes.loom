@@ -1,0 +1,45 @@
+// Calculate Primes
+
+textile calc_primes {
+    import builtin;
+    import control;
+
+    uses builtin;
+    uses control;
+
+    isDivisible : {int int -> Bool} =
+        numer:int denom:int -> (numer % denom == 0)
+
+    isPrime : {int [int] -> Bool} =
+        value:int primes:[int] -> {
+            head : int tail : [int] = primes
+        }
+        if (Bool) isDivisible(value, head) 
+            False
+            isPrime(value, tail)
+
+    isPrime | * [] = True;
+
+    generatePrimes : {-> [int]} = {
+        inner : {int [int] -> [int]} =
+            input:int existing:[int] ->
+            if ([int]) isPrime(input, existing)
+                [existing | input] 
+                [existing]
+    } (inner 3 [2])
+
+    export generatePrimes
+}
+
+import builtin;
+import control;
+import calc_primes;
+
+uses builtin;
+uses control;
+
+main := 
+    argv : [string] -> {
+        primes : [int] = calc_primes.generatePrimes;
+        console.log(primes[10000000]);
+    }

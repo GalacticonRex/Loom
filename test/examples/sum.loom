@@ -1,0 +1,33 @@
+textile sum {
+
+    import builtin *;
+    import lists;
+
+    // This sum's speed scales with the parallelization
+    sum =
+        ints -> {
+            half = lists.split ints 2;
+            a = @self half[0];
+            b = @self half[1];
+
+            @self -> [x, y] -> x + y;
+            @self -> x -> x;
+            @self -> [] -> 0;
+        } a + b;
+
+    // Should this be slower than the program above?
+    slow_sum = ints -> ints[0] + @self ints[1:]];
+    slow_sum -> [] -> 0;
+
+    export sum;
+
+}
+
+import builtin *;
+import lists;
+import console;
+import sum;
+
+main : {[string] -> int} = argv -> {
+    console.log sum.sum [1,2,3,4,5,6,7,8,9,10];
+} 0;

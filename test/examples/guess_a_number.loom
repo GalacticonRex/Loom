@@ -1,0 +1,36 @@
+import builtin *;
+import control *;
+import random;
+import console;
+
+:else_stmt = {()->()};
+else : {()->() -> else_stmt} = a -> a.else_stmt;
+
+if : {Bool {()->()} else_stmt ->};
+if | True * * = a * -> { a };
+if | False * * = * b -> { b };
+
+if : {Bool {()->()} ->};
+if | True * = a -> { a };
+if | False * = a ->;
+
+guess := number:int attempt:int max_attempts:int -> {
+    console.log("Guess a number between 1 and 100!")
+    attempt:int = in console.input
+    if attempt == number {
+        console.log("You guessed the correct number! Congratulations!")
+    } else {
+        if attempt < number {
+            console.log("That isn't correct! Try a higher number.")
+        } else {
+            console.log("That isn't correct! Try a lower number.")
+        }
+        console.log("You have %d more guesses!" % (max_attempts - attempt))
+        attempt number attempt+1 max_attempts
+    }
+}
+
+main := {
+    value := random.int(1,100);
+    guess value 1;
+}

@@ -1,0 +1,89 @@
++--------------------------------------------------+
+|           Loom Byte Code List (Yarn)             |
++--------------------------------------------------+
+
++--------------------------------------------------+
+| Flow Control                                     |
++--------------------------------------------------+
+
+    RETN 
+        [RET]ur[N]
+        Return from a function call [RPC, RPCS, CALL].
+
+    RPC  [FN-PTR] [PARAM-LIST...]
+        [R]emote [P]rocedure [C]all
+        Non-blocking call of another function.
+        This function will run even after the calling function exits.
+
+    RPCS [SYNC-PTR] [FN-PTR] [PARAM-LIST...]
+        [R]emote [P]rocedure [C]all [S]ynchronized
+        Non-blocking call of another function.
+        Must be supplied the pointer of a sync structure. This call is
+        used in tandum with FANO and FANI to synchronize remote calls
+        (similar to how a barrier works).
+
+    CALL [FN-PTR] [PARAM-LIST...]
+        Blocking call to another function.
+
+    SYSC ["FN-NAME"] [PARAM-LIST...]
+        [SYS]tem [C]all
+        Blocking call to a function in the SYSCL module.
+
+    FANO [SYNC-PTR]
+        [FAN] [O]ut
+    FANI  [SYNC-PTR]
+        [FAN] [I]n
+
+    JUMP [FN-PTR]
+    JZ [FN-PTR] [VAL]
+    JNZ [FN-PTR] [VAL]
+    JGR [FN-PTR] [LEFT-VAL] [RIGHT-VAL]
+    JGRE [FN-PTR] [LEFT-VAL] [RIGHT-VAL]
+    JEQ [FN-PTR] [LEFT-VAL] [RIGHT-VAL]
+    JNEQ [FN-PTR] [LEFT-VAL] [RIGHT-VAL]
+    JLS [FN-PTR] [LEFT-VAL] [RIGHT-VAL]
+    JLSE [FN-PTR] [LEFT-VAL] [RIGHT-VAL]
+    ASSG [DST-PTR] [SRC-VAL]
+    NOOP 
+
++--------------------------------------------------+
+| Memory                                           |
++--------------------------------------------------+
+
+    MAKE   -- no impl
+    FREE   -- no impl
+
++--------------------------------------------------+
+| Math                                             |
++--------------------------------------------------+
+
+    INCR [DST-AND-SRC-COUNT] [DST-AND-SRC-PTR]
+    DECR [DST-AND-SRC-COUNT] [DST-AND-SRC-PTR]
+
+    XXX[BITS] [COUNT] [DST] [SRC]
+        use ADD, SUB, MUL, DIV, MOD, POW, LOG, SIN, COS, TAN in place of XXX
+        [BITS]   number of bits per element
+        [COUNT]  number of elements in DST
+        [DST]    pointer to the input (which will be overriden by the output)
+        [SRC]    other element with which to perform the 
+        @NOTE: assumes unsigned integers as input (except SIN COS and TAN)
+
+        Example:
+            ADD32 8 some-ptr other-ptr
+            // adds <other-ptr> to 8 32 bit integers starting at <some-ptr>
+
+        Extensions
+        ...V -- do a component wise operation ([SRC] has [COUNT] values instead of 1)
+            Example: ADDV32 8 dst src
+        ...F -- floating point (cannot be used with S)
+            Example: ADDFV64 8 dst src
+            @NOTE: SIN, COS, and TAN are floating point already
+        S... -- signed (cannot be used with F)
+            Example: SADD32 8 dst src
+
++--------------------------------------------------+
+| Advanced                                         |
++--------------------------------------------------+
+
+    REDC   -- [FN-PTR] [OUTPUT-PTR] [ARRAY-LEN-VAL] [ARRAY-PTR]
+    KERN   -- [FN-PTR] [COUNT-VAL] [PARAM-LIST...]

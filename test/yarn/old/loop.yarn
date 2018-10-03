@@ -1,0 +1,24 @@
+// Loop over an array of integers (provided via the command line)
+// and print out their sum.
+// Command line arguments are supplied to the program via the first
+// argument of the initial frame. So (0) refers to a structure that
+// has as it's first element the number of arguments (argc), an
+// array of string locations (of length argc) and then a buffer of
+// tightly packed strings.
+
+[TEXT]
+
+:INITIALIZE
+
+// make a 4kb buffer for integers
+MAKE (4) 4096
+
+ASSG (16) [0 0]
+:LOOP
+
+
+DECR (16)
+JNZ  (16)
+
+// free previously allocated buffer
+FREE (4)

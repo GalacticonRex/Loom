@@ -1,0 +1,19 @@
+import builtin*
+import control*
+import sys
+
+textile Concurrent {
+    sum : {[int] -> int} = 
+        list:[int] -> sum list[,list[]/2] + sum list[list[]/2,]
+    sum | [] = 0
+}
+
+import Concurrent
+
+mloop := {
+    values : [int] = list sys.argv (a:string) -> (a.int)
+    total := Concurrent.sum values
+    console.log total
+}
+
+mloop

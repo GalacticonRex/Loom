@@ -1,0 +1,8 @@
+#ifndef __LOOM_VERSION_HPP__
+#define __LOOM_VERSION_HPP__
+
+#define LOOM_MAJOR_VERSION 0
+#define LOOM_MINOR_VERSION 1
+#define LOOM_PATCH_VERSION 0
+
+#endif//__LOOM_VERSION_HPP__

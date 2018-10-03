@@ -1,0 +1,27 @@
+@import axioms *;
+@import builtin *;
+@import std;
+@import sort;
+
+EyeColor = {brown, green, hazel, blue, grey, black};
+@order EyeColor = @ordering(black, hazel, brown, grey, blue, green);
+
+Person = (
+    weight float,
+    height float,
+    eye_color EyeColor
+);
+@order Person = @ordering(Person.weight -> Person.height -> Person.eye_color);
+
+@main = {
+
+    people =
+        for [0 .. 100] with std.random.new()
+        do function(i, random) -> random(Person);
+
+    sorted_people = std.sort(people);
+
+    console.log(people);
+    console.log(sorted_people);
+
+} -> 0;

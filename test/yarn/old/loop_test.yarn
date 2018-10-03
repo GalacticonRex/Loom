@@ -1,0 +1,39 @@
+[TEXT]
+
+:INITIALIZE
+// interpreter provides a memory block in the (0) slot
+ASSG {1} (0 0); // ARGC
+JNEQ FATAL_ERROR (1) 3; // incorrect number of arguments
+ASSG {1} {0 (0 2)};
+SYSC "strtol" (1) {2};
+ASSG {1} {0 (0 3)};
+SYSC "strtol" (1) {3};
+
+DIV {3} (2);
+
+FANO {128};
+    JUMP MAIN_LOOP_ITER;
+    :MAIN_LOOP
+        RPCS {128} SIMPLE_LOOP (3);
+        DECR {2};
+    :MAIN_LOOP_ITER
+    JNZ  MAIN_LOOP (2);
+FANI {128};
+
+RETN;
+
+:SIMPLE_LOOP // (loop size)
+    :OUTER_LOOP
+    	DECR {0};
+    JNZ OUTER_LOOP (0);
+RETN;
+
+:FATAL_ERROR
+SYSC "print_string" [ERR];
+SYSC "print_string" [NL];
+RETN;
+
+[GLOBAL]
+NL      "\n";
+SP      " ";
+ERR     "An error occurred, exitting now.";

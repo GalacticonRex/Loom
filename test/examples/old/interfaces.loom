@@ -1,0 +1,33 @@
+textile Examples {
+
+    import builtin*;
+
+    // Declaring new types
+    // Polymorphism in the form of duck typing
+    {
+        
+        :convert_int =
+            ( intToString:{int -> string},
+              checkPair:{int string -> Bool} );
+
+        impl0 : convert_int = (
+            (a:int)(if (a%2==0) "Even" "Odd"),
+            (a:int, b:string)(impl.intToString a == b)
+        );
+
+        impl1 : convert_int = (
+            (a:int)(if (a<10==0) "Less than 10" "Greater than or equal to 10"),
+            (a:int, b:string)(impl.intToString a == b)
+        );
+
+        // this function will accept both impl0 and impl1
+        compareToTen : {convert_int -> string} =
+            (a:convert_int)(a.intToString 10);
+
+        console.log compareToTen impl0
+        console.log compareToTen impl1
+        // >>> Even
+        // >>> Greater than or equal to 10
+    }
+
+}

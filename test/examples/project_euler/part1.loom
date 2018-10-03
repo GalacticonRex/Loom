@@ -1,0 +1,13 @@
+@import impl *;
+@import control *;
+@import std;
+@import console;
+
+is3or5 = function(i int) -> (std.remainder(i, 3) = 0 || std.remainder(i, 5) = 0));
+
+@main {int -> int} =
+    function(count) {
+        @assume count > 0;
+        divs = std.filter([0 .. count], is3or5);
+        console.log(std.sum(divs));
+    } -> 0;

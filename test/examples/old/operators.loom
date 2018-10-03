@@ -1,0 +1,17 @@
+textile Examples {
+    import builtin*;
+    import control*;
+
+    :point = (x:int,y:int);
+
+    _equality_check = "a==b"{"a":Type, "b":Type} : {Type, Type -> Bool};
+    _equality_check | <int, int> = builtin._internal.__integer32_equality;
+    _equality_check | <point, point> = 
+        (a:point, b:point)(
+            builtin._internal.__boolean_and(
+                builtin._internal.__integer32_equality a.x b.x,
+                builtin._internal.__integer32_equality b.x b.y
+            )
+        );
+
+}

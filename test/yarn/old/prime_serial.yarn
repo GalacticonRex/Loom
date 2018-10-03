@@ -1,0 +1,77 @@
+// Generates prime values on a single thread
+// prime_serial <MAX-PRIME>
+
+[TEXT]
+
+:INITIALIZE
+// interpreter provides a memory block in the (0) slot
+ASSG {1} (0 0); // ARGC
+JNEQ FATAL_ERROR (1) 2; // incorrect number of arguments
+ASSG {1} {0 (0 2)};
+SYSC "strtol" (1) {2};
+
+CALL ISPRIME_RANGE {3} 2 (2);
+
+SYSC "print_string" [NL];
+
+SYSC "print_string" [A];
+SYSC "print_int" (3);
+SYSC "print_string" [B];
+SYSC "print_int" (2);
+SYSC "print_string" [C];
+SYSC "print_string" [NL];
+
+RETN;
+
+:ISPRIME_RANGE // (return-location, int-lower, int-higher)
+    ASSG {3} (1);
+    :ISPRIME_RANGE_LOOP
+    CALL ISPRIME (0) (3);
+    INCR {3};
+    JLS  ISPRIME_RANGE_LOOP (3) (2);
+RETN;
+
+:ISPRIME // (return-location, int-to-check)
+    ASSG {2} (1);    // (2) will be our maximum check value
+    SYSC "sqrt" {2}; // Replace (2) with its square root
+    ASSG {3} 2;      // (3) will be our iterator
+    JGR  ISPRIME_SUCCESS (3) (2);
+    :ISPRIME_LOOP
+        ASSG {4} (1);
+        MOD  {4} (3);
+        JZ   ISPRIME_FAIL (4);
+        INCR {3};
+    JLSE ISPRIME_LOOP (3) (2);
+    :ISPRIME_SUCCESS
+    SYSC "print_string" [SUCC1];
+    SYSC "print_int" (1);
+    SYSC "print_string" [SUCC2];
+    SYSC "print_string" [NL];
+
+    INCR (0);
+:ISPRIME_FAIL
+RETN;
+
+:FATAL_ERROR
+SYSC "print_string" [ARGS];
+SYSC "print_string" [NL];
+SYSC "print_string" [USAGE];
+SYSC "print_string" [NL];
+RETN;
+
+[GLOBAL]
+NL      "\n";
+SP      " ";
+TEST1   "Test range (";
+TEST2   ", ";
+TEST3   ")";
+TEST4   "Primes in range : ";
+A       "There are ";
+B       " integers less than ";
+C       " that are prime.";
+ARGS    "Please provide the correct number of arguments.";
+USAGE   "USAGE: prime_serial <MAX-CHECK>";
+ERR     "An error occurred, exitting now.";
+SUCC1   "The integer ";
+SUCC2   " is prime";
+THREADS 8;

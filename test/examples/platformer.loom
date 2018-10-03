@@ -1,0 +1,61 @@
+import impl *;
+import control *;
+import console;
+import infinity;
+
+// different block types
+block_types = @set{dirt, grass, swamp, lava, empty}
+
+@main = {
+    // 2D list of elements
+    map = infinity.loadCSV("platmap.csv");
+
+    // Load sprites
+    dirt_spr = infinity.loadSprite("dirt.png");
+    grass_spr = infinity.loadSprite("grass.png");
+    swamp_spr = infinity.loadSprite("swamp.png");
+    lava_spr = infinity.loadSprite("lava.png");
+
+    // map in blocks
+    blocks [[block_types]] = 
+        for map do row -> 
+            for row do tile -> {
+                type = 
+                    switch( tile, [
+                        ("D", block_types.dirt),
+                        ("G", block_types.grass),
+                        ("S", block_types.swamp),
+                        ("L", block_types.lava),
+                        ("" , block_types.empty)
+                    ]);
+            }
+
+    render_function = 
+        arg_r infinity.renderer 
+        arg_map [[block_types]] -> {
+            enum_map = enum(arg_map);
+            for enum_map do (i, row) -> {
+                enum_row = enum(row)
+                for enum_row do (j, tile) -> {
+                    if ( tile != block_types.empty )
+                        arg_r.drawSprite(
+                            switch( tile, [
+                                (block_types.dirt, dirt_spr),
+                                (block_types.grass, grass_spr),
+                                (block_types.swamp, swamp_spr),
+                                (block_types.lava, lava_spr)
+                            ]);
+                }
+            }
+        }
+
+    game = infinity.create [
+        infinity.window.make(@args |
+            width = 640,
+            height = 480,
+            fps = 60,
+            render = render_function
+            )
+        ];
+    game.run();
+}

@@ -1,0 +1,145 @@
+@search "./test/yarn/include"
+@use "alias.yarn"
+@parse_args
+
+.hello_world = "This is a prime calculating program!"
+.math_pi = 3.1415926
+.target_argv_count = 2
+
+@entry
+@function
+:start_program
+    .argc = @stack @unit
+    .argv = @stack @address
+    .prog_value = @stack @unit
+    .max_prime = @stack @unit
+    .sync_struct = @stack @sync
+
+    JNEQ ::start_program_error (argc) target_argv_count
+
+    @function
+    .call_strtol = @stack_size
+    .strtol_string = @stack @unit
+    .strtol_output = @stack @unit
+    @end_function
+
+    IADD (argv) @address ; {argv}
+    ASSG [argv] ; {strtol_string}
+    PUSH call_strtol
+    SYSC "strtol"
+    POP
+
+    ASSG 2 ; {prog_value}
+    ASSG (strtol_output) ; {max_prime}
+
+    JLSE ::main_loop_done (max_prime) 1
+    START {sync_struct}
+    :main_loop
+        @function
+        .call_print_if_prime = @stack_size
+        .print_if_prime_input = @stack @unit
+        .print_if_prime_stack = @stack_size
+        @end_function
+
+        ASSG (prog_value) ; {print_if_prime_input}
+        SYNC (sync_struct)
+        PUSH call_print_if_prime
+        COPY print_if_prime_stack
+        RPCS ::print_if_prime
+        POP
+
+        INCR {prog_value}
+        JLSE ::main_loop (prog_value) (max_prime)
+    DEBUG "hello_world"
+    STOP (sync_struct)
+    :main_loop_done
+
+    @function
+    .call_print_done = @stack_size
+    .print_done_string = @stack @address
+    @end_function
+
+    DEBUG "done_checking_primes"
+    ASSG "Done checking for primes\n" ; {print_done_string}
+    PUSH call_print_done
+    SYSC "printf"
+    POP
+
+    RETN
+
+:start_program_error
+    @function
+    .call_error = @stack_size
+    .error_arg0 = @stack @address
+    .error_arg1 = @stack @unit
+    .error_arg2 = @stack @unit
+    @end_function
+    
+    ASSG "Program requires %d arguments, %d were supplied.\n" ; {error_arg0}
+    ASSG target_argv_count ; {error_arg1}
+    ASSG (argc) ; {error_arg2}
+
+    PUSH call_error
+    SYSC "printf"
+    POP
+
+    RETN
+@end_function
+
+@function
+:print_if_prime
+    .print_value = @stack @unit
+
+    @function
+    .call_prime = @stack_size
+    .prime_input = @stack @unit
+    .prime_result = @stack @unit
+    @end_function
+
+    ASSG (print_value) ; {prime_input}
+    PUSH call_prime
+    CALL ::check_prime
+    POP
+
+    @function 
+    .call_printf = @stack_size
+    .printf_arg0 = @stack @address
+    .printf_arg1 = @stack @unit
+    @end_function
+
+    JZ ::not_prime (prime_result)
+    ASSG "%d is prime!\n" ; {printf_arg0}
+    ASSG (print_value) ; {printf_arg1}
+    PUSH call_printf
+    SYSC "printf"
+    POP
+    :not_prime
+
+    RETN
+@end_function
+
+@function
+:check_prime
+    .input = @stack @unit
+    .output = @stack @address
+    .input_sqrt = @stack @unit
+    .counter = @stack @unit
+    .result = @stack @unit
+
+    ASSG true ; {output}
+    ASSG 2 ; {counter}
+    ISQRT (input) ; {input_sqrt}
+
+    JLS ::check_prime_loop_done (input_sqrt) 2
+    :check_prime_loop
+        IMOD (input) (counter) ; {result}
+        JEQ ::check_prime_loop_failed (result) 0
+        INCR {counter}
+        JLSE ::check_prime_loop (counter) (input_sqrt)
+    :check_prime_loop_done
+    RETN
+
+    :check_prime_loop_failed
+    ASSG false ; {output}
+    RETN
+@end_function

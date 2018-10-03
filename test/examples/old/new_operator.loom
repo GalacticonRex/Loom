@@ -1,0 +1,43 @@
+// This example demostrates function overloading and type lists
+
+import builtin*;
+import control*;
+
+// this syntax means:
+// type_list is a singleton list of a generic type
+// if that is not possible, type_list is a list with
+// a generic type as the head and another type_list
+// as the tail
+
+:type_list = [:] | [: | type_list]
+
+// This declares "new" as a factory function that
+// returns a function that takes a type_list, and
+// returns the type declared in the factory
+
+new : {:X -> {type_list -> X}};
+
+:Cube = (float, float, float, float);
+
+// This is an advanced form of pattern matching.
+// It pattern matches to the factory, then
+// subsequently matches to the resulting function.
+
+new | Cube | float float float float = 
+    (x, y, z, side) -> (x, y, z, side);
+
+new | Cube | float float float = 
+    (x, y, z) -> (x, y, z, 1.0);
+
+new | Cube | float = 
+    (side) -> (0, 0, 0, side);
+
+// NOTE: when the type is defined immediately before
+// the equals sign, the type can be omitted from the
+// implementation
+
+main := {
+    cube : Cube = new Cube (4);
+}
+
+

@@ -1,0 +1,35 @@
+import builin *;
+import control *;
+import infinity;
+import infinity.math *;
+
+:character = (position vec2, velocity vec2);
+
+main [string] =
+    argv -> {
+        game infinity.engine;
+        mainwin = game.createWindow "My Game" (640, 480);
+        infinity.loadResource("some_image.jpg")
+
+        game_state (player character);
+
+        main_loop infinity.event game_state;
+        main_loop -> ev infinity.keyboardEvent -> {
+
+        };
+
+
+        when mainwin.keyboard.pressed.escape {
+            game.done;
+        }
+        when mainwin.keyboard.pressed.arrowLeft {
+            character.x -- ;
+        }
+        when mainwin.keyboard.pressed.arrowRight {
+            character.x ++ ;
+        }
+
+
+
+        game.run main_loop;
+    } 0;

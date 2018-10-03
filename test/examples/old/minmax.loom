@@ -1,0 +1,14 @@
+// Min Max
+
+minmax : {:X -> {X X -> X X}} =
+    (:X) {
+        inner : {X X -> X X} = 
+            a:X b:X
+            if a < b 
+                (b, a)
+                (a, b);
+    } (inner);
+
+min:int, max:int = minmax 5 3;
+console.log min max
+// 3 5

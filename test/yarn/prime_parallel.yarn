@@ -1,0 +1,84 @@
+@search "./include"
+@use "alias.yarn"
+@parse_args
+
+.hello_world = "This is a fully parallel prime calculating program!"
+.target_argv_count = 1
+.message = "%d is %sprime!\n"
+.error = "Program requires %d arguments, %d were supplied.\n"
+
+@entry
+@function
+:start_program
+    .argv = @stack @address
+    .argv_count = @stack @unit
+    RETN
+@end_function
+
+@function
+:check_prime
+    .input = @stack @address
+    .output = @stack @unit
+    .input_sqrt = @stack @unit
+    .result_buffer = @stack @address
+    .result_buffer_size = @stack @unit
+    .check_prime_call = @stack_size
+
+    ISQRT (input) ; {input_sqrt}
+    INCR {input_sqrt}
+
+    @function
+    .pk_input = @stack @unit
+    .pk_output = @stack @address
+    .pk_stack = @stack_size
+    @end_function
+
+    // make output buffer
+    IMUL (input_sqrt) @unit ; {result_buffer_size}
+    MAKE (result_buffer_size) ; {result_buffer}
+
+    ASSG (input) ; {pk_input}
+    ASSG (result_buffer) ; {pk_output}
+    CNFG (input_sqrt) @unit
+    BUF (result_buffer) (result_buffer_size)
+    PUSH check_prime_call
+    COPY pk_stack
+    KERN1 ::check_coprime
+    POP
+
+    @function
+    .sum_input = @stack @address
+    .sum_output = @stack @unit
+    @end_function
+
+    ASSG (result_buffer) ; {sum_input}
+    BUF (result_buffer) (result_buffer_size) // add buffer
+    CNFG (input_sqrt) @unit // set count
+    PUSH check_prime_call
+    REDC ::sum_values
+    POP
+
+    FREE (result_buffer)
+
+    RETN
+@end_function
+
+@kernel sum_values
+    .lhs = @stack @unit
+    .rhs = @stack @unit
+    IADD (rhs) (lhs) ; {lhs}
+    RETN
+@end_kernel
+
+@kernel check_coprime
+    .index = @stack @unit // auto-supplied index
+    .value = @stack @unit // pk_input
+    .coprime = @stack @address // pk_output
+    .coprime_add = @stack @unit
+
+    IMUL (index) @unit ; {coprime_add}
+    IADD (coprime_add) (coprime) ; {coprime}
+    IADD 2 (index) ; {index}
+    IMOD (value) (index) ; (coprime)
+    RETN
+@end_kernel

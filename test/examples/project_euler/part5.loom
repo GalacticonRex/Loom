@@ -1,0 +1,10 @@
+@import impl *;
+@import control *;
+@import std;
+@import math;
+@import console;
+
+@main {-> int} = function {
+    primes = std.filter([1 ... 20], math.isPrime);
+    console.log(std.reduce(primes, std.multiply));
+} -> 0;

@@ -1,0 +1,31 @@
+textile ds {
+    import impl *;
+    import control *;
+    import std;
+
+    unordered_map = (:Key, :Value, size int, hash {Key -> int}) -> {
+
+        buckets = for std.range(0, size) do i -> [];
+
+        populate = (initial [(Key, Value)]) -> {
+            new_buckets = for initial with buckets do ((key, value), a_buckets) -> {
+                h = hash(key);
+            } std.replace(a_buckets, h, [a_buckets[h] | (key, value)]);
+        } 
+
+        _insert = (k Key, v Value) -> {
+            h = hash(k);
+            new_buckets = 
+                if ( std.indexOf(buckets[h], (k, v)) == -1 ) 
+                    std.replace(buckets, h, [buckets[h] | (key, value)])
+                else
+                    buckets;
+        } unordered_map(new_buckets, hash);
+
+    } (insert:_insert)
+}
+
+import impl *;
+import control *;
+import std;
+import ds;

@@ -1,0 +1,54 @@
+import builtin *;
+import control *;
+
+// NOTE
+// Treat variables as increasingly constrained numerical values
+// For this variable, food, only 4 specific strings are accepted
+food = "carrot" | "hay" | "avocado" | "steak";
+
+string = @singular string_range;
+int = @singular int_range;
+
+animal = (
+    noise string_range,
+    cuteness int_range,
+    can_eat {food -> bool}
+);
+
+guinea_pig animal = (animal |
+
+    noise = "oink" | "bloop" | "wheek",
+
+    cuteness = 100,
+
+    can_eat = item -> {
+        @self -> "carrot" -> true;
+        @self -> "hay" -> true;
+    } false;
+
+);
+
+human animal = (animal |
+
+    noise = "hello" | "goodbye",
+
+    cuteness = 0,
+
+    can_eat = item -> {
+        eatable = "carrot" | "avocado" | "steak";
+        @self -> eatable -> true;
+    } false;
+
+);
+
+checkEatable = (eater animal, item food) -> eater.can_eat item;
+
+// Should get:
+// true
+// false
+console.log checkEatable guinea_pig "hay";
+console.log checkEatable human "hay";
+
+// Error! Cannot print out a non-singular variable
+human_word = human.noise;
+console.log human_word;

@@ -1,0 +1,42 @@
+import builtin *;
+import control *;
+
+// When doing an index access, the "assumes" of the
+// indexing function are carried over
+// {
+//      assume [].length array > index;
+//      assume index >= 0;
+// }
+getElementAtIndex = array index -> array[index];
+
+// This program will not compile.
+// There is no guarantee that argv[1].int will return an
+// integer that is within the bounds of the provided array
+main [string] =
+    argv -> {
+        value = getElementAtIndex
+
+            // PARAM 0
+            // converts the elements from index 2 onward 
+            // into ints, and returns their array.
+            for argv[2:] do string.int
+            // NOTE: string.int {string -> int} = str -> str.int;
+
+            // PARAM 1
+            // converts the index 1 argument into an int
+            argv[1].int;
+    } 0;
+
+// This program will compile because the bounds are
+// respected by the code.
+main [string] =
+    argv -> {
+        array = for argv[2:] do arg -> arg.int;
+        index = argv[1].int;
+
+        value =
+            if 0 <= index < [].length array
+                getElementAtIndex array index;
+            else
+                int.default;
+    } value;

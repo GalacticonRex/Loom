@@ -1,0 +1,37 @@
+// This example shows the declaration and usage of enumerator types
+
+import builtin*;
+import io;
+
+:Color = [
+    Red
+    Green
+    Blue
+    Yellow
+    Orange
+    Purple
+    Grey
+    White
+    Black
+]
+
+printColor : {Color ->}
+printColor | Color.Red    = {out io.output "red"}
+printColor | Color.Green  = {out io.output "green"}
+printColor | Color.Blue   = {out io.output "blue"}
+printColor | Color.Yellow = {out io.output "yellow"}
+printColor | Color.Orange = {out io.output "orange"}
+printColor | Color.Purple = {out io.output "purple"}
+printColor | Color.Grey   = {out io.output "grey"}
+printColor | Color.White  = {out io.output "white"}
+printColor | Color.Black  = {out io.output "black"}
+
+// --- OR ---
+
+printColor2 : {Color ->} =
+    color -> {
+        out io.output color.string
+    }
+
+printColor Color.Orange // >>> orange
+printColor2 Color.Orange // >>> Orange

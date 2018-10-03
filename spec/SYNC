@@ -1,0 +1,32 @@
+--- OUTDATED ---
+
+----------------------------------
+INVKO 28 SOME_FUNC {20} ( 4) ( 8);
+INVKO 28 SOME_FUNC {24} (12) (16);
+INVKI 28 SOME_FUNC ( 0) (20) (24);
+RETRN;
+----------------------------------
+
+
+FANO (252);
+RPCS (252) SOME_FUNC {20} ( 4) ( 8);
+RPCS (252) SOME_FUNC {24} (12) (16);
+FANI (252);
+CALL SOME_FUNC ( 0) (20) (24);
+RETN;
+
+
+
+
+
+
+
+
+
+CALL
+    FANO
+    ...
+    RPCS
+    ...
+    FANI -- should block returns
+RETN

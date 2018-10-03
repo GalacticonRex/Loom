@@ -1,0 +1,71 @@
+//================================================================================
+// Reads a file and does things with it
+//================================================================================
+
+textile files {
+    read:int = 0;
+    write:int = 1;
+
+    :file = (
+        fd:@string,
+        until:{string -> string},
+        
+    )
+};
+
+textile ReadFile {
+
+    import builtin*;
+    import control*;
+    import files;
+
+    list : {:X -> { {-> Bool X} -> [X] } } =
+        (:X) {
+            inner : {{-> Bool X} -> [X]} =
+                (func:{-> Bool X}){
+                    cont:Bool, output:X = func;
+                } ( if [X] cont 
+                        [output, inner func]
+                    else
+                        [output] );
+        } (inner);
+
+    transform : {:X -> {[X] {X -> X} -> [X]}} =
+        (:X) {
+            inner : {[X] {X -> X} -> [X]} =
+                (input:[X], func:{X -> X})
+                ( [func input[0] inner input[1:] func] );
+            inner | [] * = [];
+        } (inner);
+
+    main := {
+        f : files.file = files.open "somefile.txt" files.read;
+        
+        lines : [string] = list f.until '\n'.char;
+        dif := lines[0].int;
+        new_lines : [string] =
+            transform lines (s:string)((s.int - dif).string);
+
+        o : files.file = files.open "output.csv" files.write;
+        
+        o.write(string.join new_lines '\n'.char);
+    };
+
+    main;
+
+//================================================================================
+
+    print_all : {[string] ->} =
+        (data:[string]) {
+            a:string, rest:[string] = data;
+            console.log "GOT: " a "\n";
+            print_all rest;
+        }
+    print_all | [];
+
+    f : files.file = files.open "some_file.txt" files.read;
+    print_all f.read ' ' // generates a lazy array of strings
+                         // reads until it finds a ' ' character,
+                         // then goes to the next element in the array
+                         // zero length strings are not returned
+};

@@ -1,0 +1,28 @@
+// This is an example of calling foreign
+// functions from inside Loom
+
+// Typically a textile must be built
+// around the foreign functions in order
+// to guarantee their usage.
+
+textile Foreign {
+    import builtin.*;
+    import control.*;
+
+    // Foreign API
+    import C;
+
+    a : string = "hello %s";
+    b : string = "stranger";
+    c : string = "world";
+
+    C.printf a b;
+    C.printf a c;
+
+    d : string = "10000";
+    e : int = C.atoi(d);
+
+    output : @string;
+    C.sprintf(output, "%s", "bob");
+    str : string = in output;
+}

@@ -1,0 +1,74 @@
+[GLOBAL]
+
+    NL      "\n";
+    SP      " ";
+    ERR     "An error occurred, exitting now.";
+    MSG1    "Iterate ";
+    MSG2    " times.";
+    DONE    "Thread done!";
+
+[TEXT]
+
+    :INITIALIZE
+
+        // interpreter provides a memory block in the (0) slot
+        ASSG {1} (0 0); // ARGC
+        JNEQ FATAL_ERROR (1) 3; // incorrect number of arguments
+        ASSG {1} {0 (0 2)};
+        SYSC "strtol" (1) {2};
+        ASSG {1} {0 (0 3)};
+        SYSC "strtol" (1) {3};
+
+        //DIV {3} (2);
+
+        FANO {128};
+            JUMP MAIN_LOOP_ITER;
+            :MAIN_LOOP
+                SYSC "print_int" (3);
+                SYSC "print_string" [SP];
+                SYSC "print_int" (2);
+                SYSC "print_string" [NL];
+                RPCS {128} RECURSE (3) (2);
+                DECR {2};
+            :MAIN_LOOP_ITER
+            JNZ  MAIN_LOOP (2);
+        FANI {128};
+
+    RETN;
+
+    :FATAL_ERROR
+        SYSC "print_string" [ERR];
+        SYSC "print_string" [NL];
+    RETN;
+
+    :SMALL_LOOP
+        NOOP;
+    RETN;
+
+    :INDIRECT_CALL
+        //SYSC "print_string" [MSG1];
+        //SYSC "print_int" (0);
+        //SYSC "print_string" [MSG2];
+        //SYSC "print_string" [NL];
+        CALL REPEAT_LOOP (0);
+        //SYSC "print_string" [DONE];
+        //SYSC "print_string" [NL];
+    RETN;
+
+    :REPEAT_LOOP // loop-size
+        :OUTER_LOOP
+            NOOP;
+            DECR {0};
+            NOOP;
+        JNZ OUTER_LOOP (0);
+    RETN;
+
+    :RECURSE
+        JUMP RECURSE_LOOP_END;
+        :RECURSE_LOOP_START
+            DECR {0};
+            CALL RECURSE (0) (1);
+        :RECURSE_LOOP_END
+        JNZ RECURSE_LOOP_START (0);
+    :RECURSE_DONE
+    RETN;

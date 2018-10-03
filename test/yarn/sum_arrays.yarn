@@ -1,0 +1,139 @@
+@search "./test/yarn/include"
+@use "alias.yarn"
+@parse_args
+
+.hello_world = "This program sums two arrays!"
+.target_argv_count = 5
+
+@entry
+@function
+:start_program
+    .argc = @stack @unit
+    .argv = @stack @address
+    .buffer_elements = @stack @unit
+    .buffer_a_name = @stack @address
+    .buffer_b_name = @stack @address
+    .buffer_c_name = @stack @address
+    .buffer_sync = @stack @sync
+    .buffer_size = @stack @unit
+    .buffer_a = @stack @address
+    .buffer_b = @stack @address
+    .buffer_c = @stack @address
+    .tmpfile = @stack @address
+
+    JNEQ ::start_program_error (argc) target_argv_count
+
+    @function
+    .call_strtol = @stack_size
+    .strtol_string = @stack @address
+    .strtol_output = @stack @unit
+    @end_function
+
+    IADD (argv) @address ; {argv}
+    ASSG [argv] ; {strtol_string}
+    PUSH call_strtol
+    SYSC "strtol"
+    POP
+
+    ASSG (strtol_output) ; {buffer_elements}
+
+    IADD (argv) @address ; {argv}
+    ASSG [argv] ; {buffer_a_name}
+
+    IADD (argv) @address ; {argv}
+    ASSG [argv] ; {buffer_b_name}
+
+    IADD (argv) @address ; {argv}
+    ASSG [argv] ; {buffer_c_name}
+
+    IMUL (buffer_elements) @unit ; {buffer_size}
+
+    MAKE (buffer_size) ; {buffer_a}
+    MAKE (buffer_size) ; {buffer_b}
+    MAKE (buffer_size) ; {buffer_c}
+
+    FILEOPEN (buffer_a_name) "rb" ; {tmpfile}
+    FILEREAD (buffer_size) (tmpfile) ; (buffer_a)
+    FILECLOSE (tmpfile)
+
+    FILEOPEN (buffer_b_name) "rb" ; {tmpfile}
+    FILEREAD (buffer_size) (tmpfile) ; (buffer_b)
+    FILECLOSE (tmpfile)
+
+    @function
+    .__base__kernel_call = @stack_size
+    .kernel_call_arg__bufa = @stack @address
+    .kernel_call_arg__bufb = @stack @address
+    .kernel_call_arg__bufc = @stack @address
+    .__copy__kernel_call = @stack_size
+    @end_function
+
+    // Kernel call setup
+    BUFFER READ  (buffer_size) (buffer_a) ; {kernel_call_arg__bufa}
+    BUFFER READ  (buffer_size) (buffer_b) ; {kernel_call_arg__bufb}
+    BUFFER WRITE (buffer_size) (buffer_c) ; {kernel_call_arg__bufc}
+
+    START {buffer_sync}
+    SYNC (buffer_sync)
+
+    CNFG1 (buffer_elements)
+    COPY __copy__kernel_call
+
+    // Kernel call execution
+    PUSH __base__kernel_call
+    KERN1 ::sum_arrays
+    POP
+
+    STOP (buffer_sync)
+
+    FILEOPEN (buffer_c_name) "wb"; {tmpfile}
+    FILEWRITE (buffer_size) (buffer_c) ; (tmpfile)
+    FILECLOSE (tmpfile)
+
+    FREE (buffer_a)
+    FREE (buffer_b)
+    FREE (buffer_c)
+
+    RETN
+
+:start_program_error
+    @function
+    .call_error = @stack_size
+    .error_arg0 = @stack @address
+    .error_arg1 = @stack @unit
+    .error_arg2 = @stack @unit
+    @end_function
+    
+    ASSG "Program requires %d arguments, %d were supplied.\n" ; {error_arg0}
+    ASSG target_argv_count ; {error_arg1}
+    ASSG (argc) ; {error_arg2}
+
+    PUSH call_error
+    SYSC "printf"
+    POP
+
+    RETN
+@end_function
+
+@kernel sum_arrays
+    .arg_buffer_a = @stack @address
+    .arg_buffer_b = @stack @address
+    .arg_buffer_c = @stack @address
+    .index = @stack @unit
+
+    INDEX1 {index}
+    IMUL (index) @unit ; {index}
+
+    KARG @address[0] ; {arg_buffer_a}
+    KARG @address[1] ; {arg_buffer_b}
+    KARG @address[2] ; {arg_buffer_c}
+
+    IADD (arg_buffer_a) (index) ; {arg_buffer_a}
+    IADD (arg_buffer_b) (index) ; {arg_buffer_b}
+    IADD (arg_buffer_c) (index) ; {arg_buffer_c}
+
+    // actual work
+    IADD [arg_buffer_a] [arg_buffer_b] ; (arg_buffer_c)
+
+    RETN
+@end_kernel

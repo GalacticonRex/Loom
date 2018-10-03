@@ -1,0 +1,36 @@
+import impl *;
+import hnderr *;
+
+divByZero = 1.0 / 0.0;
+
+@main f = {
+    str = "9876543210";
+    num = ::int32(str); // unhandled error case
+                        // the error will propagate up to the top level
+    num = ::int32(str) !! (errmsg) {
+        @self -> INVALID_CONVERSION -> 0;
+        @self -> OUT_OF_RANGE -> 0;
+    };
+    // this is also valid
+    // num = ::int32(str) !! err;
+    // err -> INVALID_CONVERSION -> 0;
+} -> 0;
+
+@main g = {
+    generate {:X, :Y, {X -> X Y}, X -> [Y]} =
+    f init {
+        (a, b) = f(init);
+    } -> [b generate(f, a)];
+
+    a = 1.0;
+    b = generate((i) -> (i / 2.0, 1.0 / i), 0.0); // potential divide by zero error
+    c = b[1024]; // c has set DivideByZero
+    d = c + 1.0; // DivideByZero + float = DivideByZero
+
+    e float = 1.0 / 0.0; // compile error: float does not contain DivideByZero
+    // this allows two sets to combine
+    f {float, DivideByZero} = 1.0 / 0.0;
+
+    // b = 1.0, 2.0, 4.0, 8.0 ... DivideByZero ...
+    // DivideByZero = @set {x | x = 1.0 / 0.0};
+} -> 0;

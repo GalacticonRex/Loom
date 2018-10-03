@@ -1,0 +1,107 @@
+@textile std {
+    // Choose function returns the second argument when passed a True
+    // or returns the third argument when passed a False
+    @export choose -> (@true, A, ?) -> A;
+    @export choose -> (@false, ?, B) -> B;
+
+    // map -- :X, :Y, [X], {X -> Y} -> [Y]
+    // converts a list [X] into a list [Y] by applying
+    // the function {X -> Y} to every element in [X]
+    // this function is tail recursive
+    @export map =
+        (items, func) {
+            
+            // split items into head X and tail [X]
+            [head tail] = items
+
+            // handle base case of empty items
+            @self -> ([], ?) -> [];
+
+        // return a list with the mapped head and recursive tail
+        } -> [func(head) @self(tail, func)];
+
+    // map -- :X, :Y, :Z, [X], Z, {X Z -> Y Z} -> ([Y], Z)
+    // similar to map(items, func), but adds an additional
+    // variable Z which is carried through
+    @export map =
+        (items, data, func) {
+            [head tail] = items
+            (result, @mut data) = func(head data);
+            @self -> ([], ?) -> [];
+        } -> [result @self(tail, data, func)];
+
+    @export map =
+        (items, data, func) {
+            [head tail] = items;
+            @self -> ([], ?) -> [];
+        } -> [func(head, data) @self(tail, data, func)];
+
+    // a wrapper around "choose" that uses an if-then-else syntax
+    "if a then b"
+        @alias __if_condition = choose(a, b, []);
+    "if a then b else c"
+        @alias __if_else_condition = choose(a, b, c);
+
+    "for items do func"
+        @alias __for_do_loop = map(items, func);
+    "for items with data do func"
+        @alias __for_with_do_loop = map(items, data, func);
+
+    // strips elements from a list that does not pass a given condition
+    @export filter =
+        (list, cond) {
+            [head tail] = list;
+            @self -> ([], ?) -> [];
+        } -> [choose(cond(head), head, []) @self(tail, cond)];
+
+    @export select =
+        (list, compare) {
+            __internal = (current, rem) {
+                [head tail] = rem;
+                next = choose(compare(current, head), head, current)
+                @self -> (current, []) -> current;
+            } -> __internal(next, tail);
+
+            // since no base case is declared, list is required
+            // to be NON-EMPTY ON INVOCATION
+            [head tail] = list;
+        } -> __internal(head, tail);
+
+    // chooses the maximum value in a list
+    @export max = (A, B) -> choose(less(A, B), B, A);
+    @export max = (list) -> select(list, less);
+
+    @export take =
+        (list, amount) {
+            [head tail] = list;
+            @self -> (?, 0) -> [];
+        } -> [head @self(tail, amount-1)];
+
+    @export insert =
+        (list, sublist, index) ->
+        [list[:index] sublist list[index:]];
+    @export remove =
+        (list, start, end) {
+            @assume less(start, end);
+        } -> [list[:start] list[end:]];
+
+    @export even =
+        (value) {
+            @assume greater(value, 0);
+        } -> value % 2 == 0;
+    @export odd = (value) -> !even(value);
+
+    @textile random {
+
+        @import time;
+
+        new = function(seed) {
+            random = function(value) {
+                (result, new_seed) = // ... random stuff ...
+            } -> (result, generate(new_seed));
+        } -> random;
+
+        new = function() -> new(time.currentTimeAsInt());
+
+    };
+};

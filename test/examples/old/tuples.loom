@@ -1,0 +1,77 @@
+textile Examples {
+
+    import builtin*;
+
+    // A simple example of a homogenous tuple
+    {
+        tuple : (int,int,int,int,int) = (1,2,3,4,5)
+        a:int, b:int, c := tuple;
+        console.log( 'a = ' .. a.string ..
+                     ', b = ' .. b.string .. 
+                     ', c = ' .. c.string );
+        // >>> a = 1, b = 2, c = (3,4,5)
+    }
+
+    // A simple example of a homogenous named tuple
+    {
+        named_tuple : (string, string) = (hello:"Hello", goodbye:"Goodbye");
+        console.log( named_tuple.hello )
+        // >>> Hello
+
+        // names can also be specified in the type and are inheritted into
+        // the tuple itself
+        named_tuple2 : (hello:string, goodbye:string) = ("Hello", "Goodbye");
+        console.log( named_tuple2.hello )
+        // >>> Hello
+
+        // names declared in the type get overwritten by names in the tuple
+        named_tuple3 : (goodbye:string, hello:string) = (hello:"Hello", goodbye:"Goodbye");
+        console.log( named_tuple3.hello );
+        // >>> Hello
+        //The naming at the variable level only exists for that one instance however:
+        :string_pair = (goodbye:string, hello:string);
+        console.log (a:string_pair)(a.goodbye)(named_tuple3);
+        // >>> Hello
+
+        // non-conflicting names from the type carry over
+        named_tuple4 : (potato:string, tomato:string) = (hello:"Hello", goodbye:"Goodbye");
+        console.log( named_tuple3.hello );
+        console.log( named_tuple3.tomato );
+        // >>> Hello
+        // >>> Goodbye
+    }
+
+    // A simple example of a heterogenous tuple
+    {
+        tuple : (int,string) = (1,"one");
+        a:int, b:string = tuple;
+
+        c:int, d:int = tuple; // this will not compile!
+    }
+
+    // Tuple of Types and Empty Tuples
+    {
+        // Really complicated type, use type inference
+        // (int, int, string, (int, int), string, [float], int, int, string, string)
+        tuple := (1,2,"hello",(3,4),"moo moo",[5.0,6.0],7,8,"nine","ten");
+        print_all : {: -> :} = :X {
+            inner : {: ->} = 
+                tuple {
+                    :thead, :ttail = tuple:;
+                    a:thead, b:ttail = tuple;
+                    console.log a
+                    print_all b
+                }
+            inner | ();
+        } inner
+
+    }
+
+    // Tuple Concatenation
+    {
+        tupa := (1,2,3,4,5)
+        tupb := (1,2,3,4,5)
+        tupc := (tupa | tupb)
+    }
+
+}

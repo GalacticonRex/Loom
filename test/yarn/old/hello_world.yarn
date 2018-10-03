@@ -1,0 +1,15 @@
+// Print Arguments!
+
+[TEXT]
+
+:INITIALIZE
+
+SYSC "print_string" [HW];
+SYSC "print_string" [NL];
+SYSC "print_string" [NL];
+
+RETN;
+
+[GLOBAL]
+NL "\n";
+HW "HELLO WORLD";

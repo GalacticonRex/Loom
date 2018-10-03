@@ -1,0 +1,27 @@
+import impl *;
+import OpenGL;
+
+GL = OpenGL;
+
+@main = {
+    gl = GL.createContext();
+
+    (vbuf, ?) = gl.genVertexBuffer();
+    (prog, ?) = gl.genProgram();
+    (vert, ?) = gl.genShader(GL.VERTEX_SHADER);
+    (frag, ?) = gl.genShader(GL.FRAGMENT_SHADER);
+
+    rect_data = [
+        0, 0, 1, 0, 0, 1,
+        0, 0, 0, 1, 1, 1
+    ];
+
+    gl.bindBuffer(GL.ARRAY_BUFFER, vbuf)
+      .bufferData(GL.ARRAY_BUFFER, rect_data, GL.STATIC_DRAW);
+
+    gl.shaderSource(vert, (In, Uniform) -> In.position);
+    gl.shaderSource(frag, (In, Uniform) -> (1.0, 0.0, 0.0, 0.0));
+
+    gl.attachShader(prog, vert);
+    gl.attachShader(prog, frag);
+} -> 0;

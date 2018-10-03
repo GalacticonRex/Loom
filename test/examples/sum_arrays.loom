@@ -1,0 +1,24 @@
+import impl *;
+import control *;
+import std.hnderr *;
+import std;
+import file;
+import format;
+
+"for a do b" = (a, b) { 
+    @self -> [] ? -> [];
+} -> [b(a[0]) @self(a[1:], b)];
+
+@main = {
+    [bufferA, bufferB] =
+        for ["bufferA.txt", "bufferB.txt"] do buffer -> 
+            for format.split(file.read(buffer) !! err, ",") do s -> ::int(s);
+    err -> FILE_NOT_FOUND -> [];
+
+    bufferC = for std.zip(bufferA, bufferB) do (a, b) -> a + b;
+
+    file.write(
+        "bufferC.txt", 
+        format.join(for bufferC do i -> ::string(i), ",")
+        );
+} -> 0;

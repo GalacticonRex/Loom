@@ -1,0 +1,5 @@
+// Alias YARN File
+// include various useful abbreviations and variables
+
+.true = 1
+.false = 0

@@ -1,0 +1,288 @@
+--- OUTDATED ---
+
++===================================================================+
+|                                                                   |
+|               ██╗      ██████╗  ██████╗ ███╗   ███╗               |
+|               ██║     ██╔═══██╗██╔═══██╗████╗ ████║               |
+|               ██║     ██║   ██║██║   ██║██╔████╔██║               |
+|               ██║     ██║   ██║██║   ██║██║╚██╔╝██║               |
+|               ███████╗╚██████╔╝╚██████╔╝██║ ╚═╝ ██║               |
+|               ╚══════╝ ╚═════╝  ╚═════╝ ╚═╝     ╚═╝               |
+|               Specification                                       |
++===================================================================+
+
+Welcome to the LOOM Programming Language Specification.
+LOOM is a functional, concurrent programming language designed for
+robust game development. LOOM can be both interpreted and compiled.
+
+=========================================
+ Reserved Keywords
+=========================================
+
+Below is the list of reserved words in LOOM. These words cannot be
+used in any other context than that which is specified here:
+
+    textile -- declares the namespace of a file
+            -- MUST be followed by an alphanumerical name
+            -- MUST immediately open a sequence {...}
+
+    import  -- similar to "include" in C
+            -- creates a tuple of all the functions in the named
+            --     textile
+            -- MUST be the first word in statement
+            -- MUST be its own statment
+
+    export  -- determines if a name will be visible to other textiles
+                    via "import"
+            -- MUST be the first word in statement
+            -- MUST be its own statment
+
+    in      -- generates side-effect to read in contents of an
+               external resource
+            -- typically used for reading from files, stdin or user
+               input
+
+    out     -- generates side-effect to write out contents to an
+               external resource
+            -- typically used to write to files, stdout, network
+               devices and graphical devices
+
+That's it!
+All other typical keywords (if, while, for, etc.) are defined as
+functions in the LOOM "builtin" or "control" libraries. 
+
+=========================================
+ Identifer Rules and Conventions
+=========================================
+
+To preface, the characters available to the user are divided into
+two categories: special and non-special characters.
+
+Special characters include !, @, # and so on. In general, special
+characters are symbols that are not used to identify words or
+numbers in a written language (for example, 三 and 貓 are not
+considered special characters, but 。is because it is not a word
+in and of itself).
+
+Non-special characters include the Latin alphanumeric characters
+(a-z, A-Z, 0-9) and the underscore, but can be extended to the
+rest of the Unicode characters if desired (こんにちは世界).
+
+Identifiers are words used to identify variables and functions
+within the context of the program. They typically start with
+an alphabet character and contain only non-special characters.
+Any combination of non-special characters is a valid identifier,
+however.
+
+    Valid
+        cat_food_remaining
+        Is_It_Okay
+        3DTools
+
+    Invalid
+        Student_#1
+        Is_It_Okay?
+        3D.Tools
+
+=========================================
+ Operators
+=========================================
+
+As a result of having so few keywords, LOOM has a number of
+important character syntaxes:
+
++-----------+----------+--------------------------------------------+
+| Class     | Operator | Purpose                                    |
++-----------+----------+--------------------------------------------+
+| Sequence  | {}       | Creates a statment sequence                |
+| Tuple     | ()       | Creates a (potentially) heterogenous list  |
+|           |          |     of elements                            |
+| List      | []       | Creates a homogenous list of elements      |
+|           |          |     (indexable with the "builtin" textile) |
+| Type      | :        | Gets or sets the type of an identifer      |
+| Member    | .        | Accesses a named member of a tuple         |
+| Guard     | |        | Sets an override for a function given      |
+|           |          |     specific parameters                    |
+|           |          | Additionally, it allows the concatentation |
+|           |          |     of lists                               |
+| Separator | ,        | Separates elements in a list of tuple      |
+| End Stmt  | ;        | Separates elements in a sequence           |
+| Func Iden | ->       | Separates function input and output        |
+| Channel   | @        | Declares a type to be a channel            |
++-----------+----------+--------------------------------------------+
+
+Sequence Operator -- {...}
+    
+    The sequence operator opens up a new "sequence" in the LOOM
+    program, and allows for sequential execution within it. Any
+    variable or function declared within a sequence can be used
+    in any subsequent statement in the same sequence. In the
+    context of functions, variables declared within a sequence
+    may also be used in the return statement.
+
+    When the sequence exits, all variables and functions declared
+    within it are also destroyed.
+
+Tuple Operator -- (...)
+    
+List Operator -- [...]
+
+Type Operator -- :
+
+    The type operator has a variety of uses, all pertaining to
+    the getting and setting of types. The uses of the type
+    operator can be summarized in four simple functions:
+
+    Setting an identifiers type     -- X : ...
+    Getting an identifiers type     -- X :
+    Declaring a type holder         -- : X
+    Placeholder for type inference  -- {: : -> :}
+
+    ----------------------------
+    Setting an Identifier's Type
+    ----------------------------
+
+    some_iden : some_type;
+    some_iden : some_type = ...;
+    func : {int ->} = some_arg : int {
+        ...
+    }
+
+    ----------------------------
+    Getting an Identifier's Type
+    ----------------------------
+
+    some_iden2 : some_iden: = ...;
+
+    -----------------------
+    Declaring a Type Holder
+    -----------------------
+
+    Type holders are slightly more complicated than the previous two
+    operations. When assigned a type holder, no type is specified.
+
+    :type_holder = int;
+
+    But what is a type holder of a type holder?
+
+    :type_holder = int;
+    :type_holder2 = type_holder: ;
+
+    Fortunately there is no special "type" type. The type of a type
+    holder is whatever type it is holding onto. Therefore, the getter
+    in the above example returns <int>, since that is the type held
+    by <type_holder>
+
+    ---------
+    None Type
+    ---------
+
+    In some cases there will be a time when a type does not exists
+    for the result of a function. For example:
+
+    :tuple = (int, int);
+    :a, :b, :c = tuple;
+
+    In this case, <a> and <b> are both assigned to the type int (yes,
+    tuple extraction works with tuple types too). Then what is the
+    type of <c>? The answer is that it is the "empty tuple" type,
+    denoted by ().
+
+    Types can be declared as the empty tuple, although it really
+    serves no purpose. Types can also be compared to the empty tuple
+    for purposes of guarding against edge cases and creating a base
+    case for recursion.
+
+    print_all : {:A -> {A ->}} = :X -> {
+        inner : {X ->} = 
+            tuple {
+                :thead, :ttail = tuple:;
+                a:thead, b:ttail = tuple;
+                console.log a
+                print_all b
+            }
+        inner | ();
+    } inner
+
+=========================================
+ Operator Definition
+=========================================
+
+It is possible to define special functions that do not follow the
+typical function naming scheme. Such functions are referred to as
+"operators." Examples of these are the equivalence operator ('==') or
+the addition operator ('+').
+
+"OPERATOR_SYNTAX"@(OPERATOR_PARSE_OPTIONS) : Function Declaration
+
+OPERATOR_SYNTAX is the string the LOOM interpreter should look for.
+    "insert A into B with values(C)"
+
+OPERATOR_PARSE_OPTIONS are the variables defined for the operator.
+    @("some_variable":some_type, 
+        "some_other_variable":some_other_type, ...)
+
+Example:
+    
+    "a cat b"@("a":string, "b":string) : {string string -> string};
+
+    In this example, the operator is the identifier word "cat".
+    In the parse options, both "a" and "b" are defined as variables.
+
+Note:
+    
+    Operators ALWAYS take precedence over identifiers. If a variable
+    is declared with the same name as an operator and is used in the
+    same context as that operator, the operator will be used instead
+    of the variable.
+    Taking the above "cat" example into account:
+
+        dog, cat, mouse : string = ("Dog", "Cat", "Mouse");
+
+        console.log dog cat mouse;
+        // Expected ==> DogCatMouse
+        // Got ==> DogMouse
+
+        console.log dog cat;
+        // Expected ==> DogCat
+        // Got ==> DogCat
+
+
+
+=========================================
+ Input and Output
+=========================================
+
+The only method for creating side-effects, and therefore meaningful
+output, is view CHANNELS. Channels are defined using the @ character
+and are read from and written to using the "in" and "out" keywords.
+
+channel : @string;
+
+Inputs:
+    Files
+    Network
+    Keyboard
+    Mouse
+
+Outputs:
+    Files
+    Network
+    Graphics
+    Console
+
+=========================================
+ External <builtin> Functions
+=========================================
+
+It is possible for functions visible in LOOM to not actually be
+written in LOOM. These functions can be found in the builtin._internal
+textile. They are provided through an external library (typically
+written in C++ and made visible through the LOOM C++ API).
+
+Examples of these functions include __integer32_equality,
+__boolean_and and __float32_add. They are functions with such
+fundemental usage that it would be inefficient to attempt to capture
+their functionality in LOOM. Instead LOOM relies on the inner
+workings of the computational device to handle operations on
+primitives, such as addition and comparison.

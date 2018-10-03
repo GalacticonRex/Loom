@@ -1,0 +1,18 @@
+@import impl *;
+@import control *;
+@import std;
+@import str;
+@import console;
+
+isPalindrome = function(i) {
+    s = ::string(i);
+    len = std.length(s);
+    front = s[:len/2];
+    back = [len-len/2:];
+} -> front = std.reverse(back);
+
+@main {-> int} = function {
+    products = std.permute(([100 ... 999], [100 ... 999]), std.multiply);
+    palin = std.filter(products, isPalindrome);
+    console.log(std.max(palin));
+} -> 0;

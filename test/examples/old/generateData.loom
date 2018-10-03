@@ -1,0 +1,40 @@
+// Generate a lot of data
+
+import builtin.*;
+import control.*;
+import math;
+import random;
+
+fa : @string;
+fb : @string;
+ft : @string;
+
+generate :=
+    count:int ->
+    list( count,
+        (input:[int], r:random.generator) -> 
+        { succ, value := r.choose [-1, 1]; }
+        ([input | value], succ) );
+
+comma_list : {[int] -> string} =
+    a:[int] ->
+    join(",", 
+        list( a,
+            (input:[string], value:int) -> 
+            [input | value.string] ) );
+
+
+main :=
+    count:int ->
+    for [0 .. 100000] {
+        a := generate count;
+        b := generate count;
+
+        dot := (math.dot a b).float;
+        norm := dot / (math.norm a).float / (math.norm b).float;
+        t := math.acos norm;
+
+        out fa comma_list a + "\n";
+        out fb comma_list b + "\n";
+        out ft t.string;
+    }

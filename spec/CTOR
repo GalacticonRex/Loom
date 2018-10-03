@@ -1,0 +1,210 @@
+Textile Search
+
+               ____builtin_____
+              /                \
+   __ _internal__          ___math____
+  /    |    |    \        /           \
+ "+"  "-"  "*"  "/"     sqrt    _____linalg______________
+                               /        |                \
+                         vector        matrix        ___func___
+                        /      \      /      \      /          \
+                       dot  cross   matmul   det  convolve  generate
+
+
+Start in the most local scope
+Move up one level
+Search all siblings
+Repeat
+
+search for <"+">
+starting in <matrix>
+
+search <matrix>
+:find in siblings
+search <vector>
+search <func>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+================================================
+
+Context {
+    Variable table
+    Type table
+    Function table
+
+    Name to variable map
+    Name to type map
+    Name to function table
+}
+
+Variables --
+    Variables are an allocation of memory and an
+    associated type.
+
+Types --
+    Types represent the collection of functions that
+    act on a slice of memory.
+
+Functions --
+    Functions represent a transformation of a
+    collection of values into another collection of
+    values.
+
+power : {int int -> int} = (a:int, b:int) -> (a ** b);
+a : int = power(5,3)
+a : int = 5 ** 3
+a : int = 125
+
+Type Deduction
+    the process of determining the resulting type of
+    an expression
+
+    var := op:string a:float b:float {
+        d := switch op
+                case "add" a + b
+                case "sub" a - b
+                case "mul" a * b
+                case "div" a / b
+                case "pow" a ** b
+                default
+                    raise "Invalid operation %s" % op
+    } (d)
+
+
+
+
+
+
+
+
+
+
+
+
+================================================
+
+Constructs
+
+
+Expression expr
+    token-function [expr]
+
+Statement stmt
+    package token-iden {}
+    import token-iden [*]
+    token-iden : token-type
+    token-iden : [token-type] = expr
+
+Function func
+    tup tup
+    tup scp tup
+    tup scp
+    scp
+
+Scope scp
+    stmt; scp
+    stmt;
+
+Tuple tup
+    expr, tup
+    expr
+
+
+List lst
+
+
+================================================
+
+Types are defined by space requirements and functionality
+Type functions:
+    assignment --
+        takes as input the representation of another instance with
+        the EXACT type of the current instance
+
+================================================
+
+Binary Function Storage
+
+where is it
+    type            (1 byte) == is this function in bytecode or in binary
+    location        (4 or 8 bytes)
+arguments
+    argument count  (2 bytes) == yes, you can only have 65536 arguments
+    types...        (4 bytes +) == list of required types (where is the type in bytecode)
+
+Binary Type Storage
+
+space usage
+    size in bytes   (2 bytes)
+assignment function
+    type            (1 byte) == is this function in bytecode or in binary
+    location        (4 or 8 bytes)
+
+Binary Context Storage
+
+
+
+================================================
+
+Context {
+    VariableTable {
+        4, assign_as_int, ...
+        8, assign_as_int, ...
+        8, assign_as_string, ...
+    }
+
+    TypeTable {
+        "int" -> assign_as_int
+        "string" -> assign_as_string
+    }
+
+    FunctionTable {
+        "+" -> add_ints
+    }
+}
+
+================================================
+
+Byte-code commands
+
+push context
+pop context
+assign
+invoke function
+
+-----------
+    textile Something {
+        ...
+    }
+
+    =
+
+    push context [...]
+    ...
+    pop context
+-----------
+    a : int = 5;
+
+    =
+
+    assign 'a' 5
+-----------
+    a : int = 10 + 13;
+
+    =
+
+    invoke function '+' 10 13 -> result
+    assign 'a' result
+-----------

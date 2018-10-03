@@ -1,0 +1,12 @@
+@import impl *;
+@import std;
+@import console;
+
+@main {int->int} =
+    function (max -> {
+        @assume max > 0;
+        fib = ((a, b) -> [a @self(b, a + b)])(1, 2);
+        even_fib = std.filter(fib, std.even);
+        result = std.sum(std.take(even_fib, max/2));
+        console.log(result);
+    } 0;

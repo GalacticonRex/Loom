@@ -1,0 +1,32 @@
+.hello = "hello world!"
+.count = 999
+
+@entry
+@function
+:start_program
+    .iterator = @stack @unit
+    ASSG 4 ; {iterator}
+    :start_loop
+    @function
+    .call_iterate = @stack_size
+    .input = @stack @unit
+    @end_function
+    ASSG (iterator) ; {input}
+    PUSH call_iterate
+    CALL ::some_function
+    POP
+
+    INCR {iterator}
+    JNEQ ::start_loop (iterator) count
+    RETN
+@end_function
+
+@function
+:some_function
+    .arg0 = @stack @unit
+    .arg1 = @stack @unit
+    ASSG 0 ; {arg1}
+    :start_inner_loop
+    INCR {arg1}
+    JNEQ ::start_inner_loop (arg1) (arg0)
+@end_function

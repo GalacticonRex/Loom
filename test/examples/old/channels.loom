@@ -1,0 +1,34 @@
+import builtin *;
+import control *;
+import random;
+import c;
+
+channel : @int;
+
+textile console {
+    log : {:X -> {X -> log:}} = 
+        :X {
+            inner := input:X {
+                out c.stdout input.string;
+            } log;
+        } inner;
+};
+
+producer := 
+    output:@int, r:random.generator {
+        succ:random.generator, value:int = r.value;
+        out output value;
+        out c.stdout "Produced";
+        producer output succ;
+    };
+
+consumer :=
+    input:@int {
+        value:int = in input;
+        console.log value;
+        out c.stdout "Consumed";
+        consumer input;
+    };
+
+producer channel random.makeGenerator;
+consumer channel;

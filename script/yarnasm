@@ -1,0 +1,5 @@
+#!/bin/bash
+
+FULL=/opt/workspace/wbrennan/Loom
+LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$FULL/lib
+$FULL/bin/yarnasm $1 $2

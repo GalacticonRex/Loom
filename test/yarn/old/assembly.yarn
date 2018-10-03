@@ -1,0 +1,35 @@
+// Add eight numbers together and print
+// to the screen
+[TEXT]
+
+CALL ADD_EIGHT_NUMBERS {0} 4 5 6 7 8 9 10 11;
+SYSC "print_int" (0);
+RETN;
+
+:ADD_EIGHT_NUMBERS
+FANO (44);
+RPCS (44) ADD_FOUR_NUMBERS {36} ( 4) ( 8) (12) (16);
+RPCS (44) ADD_FOUR_NUMBERS {40} (20) (24) (28) (32);
+FANI (44);
+CALL SOME_FUNC (0) (36) (40);
+RETN;
+
+// addFourNumbers( retn(4), a(4), b(4), c(4), d(4) )
+//
+// Add four numbers together by summing
+// pairs, and then summing their results
+
+:ADD_FOUR_NUMBERS
+FANO (28);
+RPCS (28) SOME_FUNC {20} ( 4) ( 8);
+RPCS (28) SOME_FUNC {24} (12) (16);
+FANI (28);
+CALL SOME_FUNC (0) (20) (24);
+RETN;
+
+// Call to system addition
+:SOME_FUNC
+SYSC "add" (4) (8) (0);
+RETN;
+
+// DONE

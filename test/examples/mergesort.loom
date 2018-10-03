@@ -1,0 +1,86 @@
+textile MyStuff {
+    textile mergesort {
+        import builtin *;
+        import control *;
+        import lists;
+
+        // Two Layer Types
+        // Class
+        //  -- numeric (int, float, char, etc...)
+        //  -- tuple ()
+        //  -- list []
+        //  -- function {}
+        //  -- type :
+        // Genus
+        // specific type
+
+        //:integral = int | short | byte;
+
+        lists.head = list -> list[0];
+        lists.tail = list -> list[1:];
+
+        lists.len = list -> 1 + lists.len lists.tail list;
+        lists.len -> [] -> 0;
+
+        "if _cond_ then _result_ else _else_" {:X _cond_ Bool _result_ {-> :X} _else_ {-> :X}};
+        "if _cond_ then _result_ else _else_" -> True a b -> a;
+        "if _cond_ then _result_ else _else_" -> False a b -> b;
+
+        lists.split =
+            list segments = {
+                if segments % 2 == 1 then {
+
+                } else {
+
+                }
+            } sections;
+
+
+        choose -> True a b -> a;
+        choose -> False a b -> b;
+
+        mergesort = list -> {
+
+            slices = lists.split list 2;
+            front = slices[0];
+            back = slices[1];
+
+            front_sorted = mergesort front;
+            back_sorted = mergesort back;
+
+            merge = front back -> {
+                    
+                [fh | ft] = front;
+                [bh | bt] = back;
+
+                (lower, new_front, new_back) = choose fh.less(bh) (fh, ft, back) (bh, front, bt);
+
+            } lower | @self new_front new_back;
+                        // @self refers to the current functional scope
+                        // invoking @self invokes the current function
+                        // necessary for anonymous invocations
+
+            merge -> front [] -> front;
+            merge -> [] back -> back;
+            merge -> [] [] -> [];
+
+        } merge front_sorted back_sorted;
+
+        mergesort -> [] -> [];
+        mergesort -> [a] -> [a];
+        mergesort -> [a, b] -> choose a.less(b) [a, b] [b, a];
+
+        export mergesort;
+    }
+
+    import builtin *;
+    import control *;
+    import lists;
+    import console;
+    import mergesort;
+
+    unsorted = [61,25,92,39,58,11,43,80,34,22,68];
+    sorted = mergesort.mergesort unsorted;
+
+    console.log sorted;
+}

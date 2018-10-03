@@ -1,0 +1,222 @@
+@search "./test/yarn/include"
+@use "alias.yarn"
+@parse_args
+
+.hello_world = "This is a prime calculating program!"
+.math_pi = 3.1415926
+.target_argv_count = 3
+
+@entry
+@function
+:start_program
+    .argc = @stack @unit
+    .argv = @stack @address
+    .argv_offset = @stack @address
+    .thread_count = @stack @unit
+    .primes_count = @stack @unit
+
+    JNEQ ::start_program_error (argc) target_argv_count
+
+    @function
+    .call_strtol = @stack_size
+    .strtol_string = @stack @address
+    .strtol_output = @stack @unit
+    @end_function
+
+    IADD (argv) @address[1] ; {argv_offset}
+    ASSG [argv_offset] ; {strtol_string}
+    PUSH call_strtol
+    SYSC "strtol"
+    POP
+
+    ASSG (strtol_output) ; {thread_count}
+
+    IADD (argv) @address[2] ; {argv_offset}
+    ASSG [argv_offset] ; {strtol_string}
+    PUSH call_strtol
+    SYSC "strtol"
+    POP
+
+    ASSG (strtol_output) ; {primes_count}
+
+    JZ ::no_threads_entered (thread_count)
+    JLS ::no_primes_entered (primes_count) 2
+
+    .sync_struct = @stack @sync
+    .iterator = @stack @unit
+    .results = @stack @address
+    .result = @stack @unit
+    .tmp = @stack @unit
+    .tmp2 = @stack @unit
+
+    IMUL @unit (thread_count) ; {tmp}
+    MAKE (tmp) ; {results}
+
+    ASSG (thread_count) ; {iterator}
+    DECR {iterator}
+
+    START {sync_struct}
+    SYNC (sync_struct)
+    :main_loop
+        @function
+        .call_prime_counter = @stack_size
+        .prime_counter_start = @stack @unit
+        .prime_counter_stop = @stack @unit
+        .prime_counter_step = @stack @unit
+        .prime_counter_result = @stack @address
+        .prime_counter_stack = @stack_size
+        @end_function
+
+        IADD 2 (iterator)    ; {prime_counter_start}
+        ASSG (primes_count)  ; {prime_counter_stop}
+        ASSG (thread_count)  ; {prime_counter_step}
+        IMUL @unit (iterator) ; {tmp}
+        IADD (tmp) (results) ; {prime_counter_result}
+
+        PUSH call_prime_counter
+        COPY prime_counter_stack
+        HINT HEAVY
+        RPCS ::prime_counter
+        POP
+
+        JZ ::main_loop_done (iterator)
+        DECR {iterator}
+        JUMP ::main_loop
+    :main_loop_done
+    STOP (sync_struct)
+
+    ASSG 0 ; {iterator}
+    ASSG 0 ; {result}
+    JZ ::summation_loop_done (thread_count)
+    :summation_loop
+        IMUL @unit (iterator) ; {tmp}
+        IADD (results) (tmp) ; {tmp2}
+        IADD [tmp2] (result) ; {result}
+        INCR {iterator}
+        JLS ::summation_loop (iterator) (thread_count)
+    :summation_loop_done
+
+    FREE (results)
+
+    @function
+    .call_print_results = @stack_size
+    .result_string = @stack @address
+    .result_primes = @stack @unit
+    .result_total = @stack @unit
+    @end_function
+    
+    ASSG "There are %d primes less than %d.\n" ; {result_string}
+    ASSG (result) ; {result_primes}
+    ASSG (primes_count) ; {result_total}
+
+    PUSH call_print_results
+    SYSC "printf"
+    POP
+
+    :end_program
+    RETN
+
+:start_program_error
+    @function
+    .call_error = @stack_size
+    .error_arg0 = @stack @address
+    .error_arg1 = @stack @unit
+    .error_arg2 = @stack @unit
+    @end_function
+    
+    ASSG "Program requires %d arguments, %d were supplied.\n" ; {error_arg0}
+    ASSG target_argv_count ; {error_arg1}
+    ASSG (argc) ; {error_arg2}
+
+    PUSH call_error
+    SYSC "printf"
+    POP
+
+    RETN
+
+:no_threads_entered
+    @function
+    .nt_call_error = @stack_size
+    .nt_error_arg0 = @stack @address
+    @end_function
+
+    ASSG "User entered 0 threads, must have at least one.\n" ; {nt_error_arg0}
+
+    PUSH nt_call_error
+    SYSC "printf"
+    POP
+
+    RETN
+
+:no_primes_entered
+    @function
+    .np_call_error = @stack_size
+    .np_error_arg0 = @stack @address
+    @end_function
+
+    ASSG "User entered 0 as the max prime, must be at least two.\n" ; {np_error_arg0}
+
+    PUSH np_call_error
+    SYSC "printf"
+    POP
+
+    RETN
+
+@end_function
+
+@function
+:prime_counter
+    .pc_start = @stack @unit
+    .pc_stop = @stack @unit
+    .pc_step = @stack @unit
+    .pc_result = @stack @address
+    .pc_result_local = @stack @unit
+
+    ASSG 0 ; {pc_result_local}
+    JLS ::prime_counter_done (pc_stop) (pc_start)
+    :prime_counter_loop
+        @function
+        .pc_check_prime = @stack_size
+        .pc_check_prime_input = @stack @unit
+        .pc_check_prime_output = @stack @unit
+        @end_function
+        ASSG (pc_start) ; {pc_check_prime_input}
+        PUSH pc_check_prime
+        CALL ::check_prime
+        POP
+        JZ ::prime_counter_not_prime (pc_check_prime_output)
+        INCR {pc_result_local}
+        :prime_counter_not_prime
+    IADD (pc_step) (pc_start) ; {pc_start}
+    JLSE ::prime_counter_loop (pc_start) (pc_stop)
+
+    :prime_counter_done
+    ASSG (pc_result_local) ; (pc_result)
+    RETN
+@end_function
+
+@function
+:check_prime
+    .cp_input = @stack @unit
+    .cp_output = @stack @unit
+    .cp_input_sqrt = @stack @unit
+    .cp_counter = @stack @unit
+    .cp_result = @stack @unit
+
+    ASSG true ; {cp_output}
+    ASSG 2 ; {cp_counter}
+    ISQRT (cp_input) ; {cp_input_sqrt}
+
+    JLS ::check_prime_loop_done (cp_input_sqrt) 2
+    :check_prime_loop
+        IMOD (cp_input) (cp_counter) ; {cp_result}
+        JZ ::check_prime_loop_failed (cp_result)
+        INCR {cp_counter}
+        JLSE ::check_prime_loop (cp_counter) (cp_input_sqrt)
+    :check_prime_loop_done
+    RETN
+
+    :check_prime_loop_failed
+    ASSG false ; {cp_output}
+    RETN
+@end_function

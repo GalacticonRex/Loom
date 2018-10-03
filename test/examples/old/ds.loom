@@ -1,0 +1,26 @@
+textile DataStructures {
+    import builtin.*;
+    import control.*;
+
+    _dict :=
+        :X :Y {
+            incoming:@(string, string);
+            insert : {string string ->} =
+                key:string, value:string {
+                    out incoming key value;
+                };
+
+        }
+
+
+    
+    dict := :X :Y -> _dict(X, Y);
+
+}
+
+phone_directory := dict(string, string);
+phone_directory.insert("Boss", "(111) 222-3333");
+phone_directory.insert("Catherine", "(123) 321-4444");
+phone_directory.insert("Mom", "(123) 999-8765");
+
+console.log phone_directory["Boss"];

@@ -1,0 +1,49 @@
+ --- OUTDATED ---
+
+// Simple Ray Tracer example in Loom, and then the associated bytecode:
+
+import builtin*;
+import control*;
+import graphics;
+import math.linalg;
+import units;
+
+:m = units.meters
+
+:Sphere = (center:math.linalg.point(m), radius:float(m))
+:Plane = (normal:math.linalg.ray(m), offset:float(m))
+
+:Object = ???
+
+:Scene = [Object]
+
+:Camera = ???
+new | Camera float(m) float = ???
+
+render : {graphics.Context Camera Scene ->} = ???
+
+main := {
+    
+    obj1 : Sphere = (
+        center = (0.0 m, 3.0 m, 0.0 m),
+        radius = 2.0 m
+    )
+    
+    obj2 : Plane = (
+        normal = (0.0 m, 1.0 m, 0.0 m),
+        offset = 0.0 m
+    )
+
+    ctx := graphics.getContext
+
+    scene : Scene = [obj1, obj2];
+    cam : Camera = new Camera (70.0 deg) in ctx.aspectRatio
+
+    main_loop := 
+        (ctx : graphics.Context, cam : Camera, scene : Scene) -> {
+            render ctx cam scene
+            main_loop( ctx, (cam | aspectRatio = in ctx.aspectRatio), scene )
+        }
+    main_loop ctx cam scene
+
+};

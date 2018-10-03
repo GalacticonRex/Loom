@@ -1,0 +1,42 @@
+textile Examples {
+
+    import builtin.*;
+
+    // While <class> is defined in <builtin>,
+    // an example definition is given here:
+
+    //REQUIRED: recursive type system
+    //REQUIRED: variadic type system
+    //REQUIRED: type transform system
+
+    // '*' signifies that any type is accepted
+
+    class : { :X {* -> X} ({X * -> X *}...) } =
+        
+
+    // Declare a point state
+    :point_st = (x:int, y:int, z:int);
+
+    // Declare an interface for the point functions
+    point_interface := (
+        moveBy:{point_st point_st -> point_st},
+        moveTo:{point_st point_st -> point_st}
+    );
+
+    // Implement the point functions
+    point_impl : point_interface = (
+        orig:point_st pt:point_st -> (pt.x + orig.x, pt.y + orig.y, pt.z + orig.z),
+        orig:point_st pt:point_st -> pt
+    );
+
+    point_ctor : {int int -> point_st} =
+        pt : (int,int) -> pt 0;
+
+    point := class point_st point_ctor point_impl;
+
+    pt0 : point = (0,0);
+    pt1 : point = (10,10);
+
+    pt2 := pt0.moveBy(pt1);
+
+}

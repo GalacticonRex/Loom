@@ -1,0 +1,24 @@
+// Print Arguments!
+
+[TEXT]
+
+:INITIALIZE
+
+ASSG {1} (0 0);
+ASSG {2} {0 (0 1)};
+ASSG {3} {0 (0 2)};
+
+SYSC "print_int" (1);
+SYSC "print_string" [NL];
+
+SYSC "print_string" (2);
+SYSC "print_string" [NL];
+
+SYSC "print_string" (3);
+SYSC "print_string" [NL];
+
+RETN;
+
+[GLOBAL]
+NL "\n";
+HW "HELLO WORLD";

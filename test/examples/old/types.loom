@@ -1,0 +1,14 @@
+textile Examples {
+    import builtin*;
+    import control*;
+
+    :some_type = int;
+    some_func : {some_type -> some_type} =
+        (a:some_type)(a * a);
+
+    :some_tuple_type = (:X, :X, :Y);
+    some_tuple : some_tuple_type = (int, int, string);
+    other_tuple : some_tuple_type = (string, string, int);
+
+    template_func : {(:X, :X, :Y) -> :Y}
+}

@@ -1,0 +1,64 @@
+textile Game;
+
+import builtin*;
+import control*;
+import math;
+import color;
+
+import weave;
+
+:DMGType = [
+    Physical,
+    Magical,
+    Psychological
+];
+
+player
+: (
+    position : vec3,
+    
+    hp : float,
+    mana : float,
+    sanity : float,
+
+    armor : float,
+    resist : float,
+    mental : float,
+
+    moveBy : {vec3 -> player},
+    moveTo : {vec3 -> player},
+    damage : {float, DMGType -> player},
+
+)
+= (
+    position = (0.0, 0.0, 0.0),
+    
+    hp = 100.0,
+    mana = 100.0,
+    sanity = 100.0,
+    
+    armor = 0.0,
+    resist = 0.0,
+    mental = 0.0,
+
+    move:vec3 -> (player | position = player.position + move),
+    move:vec3 -> (player | position = move),
+
+    value:float type:DMGType ->
+        switch type
+            case DMGType.Physical (player | hp = player.hp - value / (1.0 + player.armor))
+            case DMGType.Magical (player | hp = player.hp - value / (1.0 + player.resist))
+            case DMGType.Psychological (player | sanity = player.sanity - value / (1.0 + player.mental));
+
+)
+
+:player_t = player: ;
+
+main := {
+    mainwin : weave.window =
+        weave.window.make("Hello", (640.px,480.px), 60.fps);
+
+
+}
+
+main;

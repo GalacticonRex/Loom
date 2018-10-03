@@ -1,0 +1,77 @@
+import impl *;
+import control *;
+import std;
+import ds;
+import io;
+import format;
+import Infinity;
+
+// set types
+MeshError = (int, string);
+Vec2 = (float, float);
+Vec3 = (float, float, float);
+Vertex = (position Vec3, uv Vec2, normal Vec3);
+Face = [int];
+MeshConstructor = (pos [Vec3], uv [Vec2], normal [Vec3], faces [Face]);
+
+@main {[string] -> int} = (argv) {
+    models = for argv do arg -> {
+        f io.File = io.open(arg);
+        (lines, ?) = io.readLines(f) !! f -> ([], f);
+
+        mesh_start MeshConstructor;
+        mesh_final = for std.enum(std.stripEmpty(lines)) with mesh_start do (ln, line, mesh) {
+            
+            [head, tail] = line;
+            
+            prefixError {string, MeshConstructor -> MeshConstructor} = (errmsg, m) {
+                console.log(format.format("Error in %: %\n", arg, errmsg));
+            } -> m;
+
+        } -> prefixSelector(ln, head, tail, mesh) !! prefixError;
+    } -> generateMesh(mesh_final)
+
+    win = Infinity.window.new(
+        width=640,
+        height=480,
+        fps=60,
+        scenes = [Infinity.scene.new(
+            objects = models,
+            lights = [Infinity.light.new(0, 0, -10)]
+            camera = Infinity.camera.new(position=(0,0,-10))
+            )]
+        );
+    Infinity.window.render(win);
+} -> 0;
+
+prefixSelector = (ln, head, tail, mesh) {
+    check = ds.Dictionary([ ('v', 3), ('u', 2), ('n', 3) ]);
+    
+    elem = format.split(format.strip(tail), " ");
+    
+    if (std.length(elem) != check[head]) {
+        !!! (
+            format.format(
+                "Invalid number of Vertex attributes on line % (got %, expected %)",
+                ln,
+                std.length(elem),
+                check[head]
+                ), 
+            mesh
+            );
+    };
+
+    vdata = std.map(::float, elem) !! ? -> 0.0f;
+    fdata = std.map(::int, elem) !! ? -> 0;
+    
+    appendMesh -> 'v' -> (mesh | pos = [mesh.pos ::Vec3(vdata)]);
+    appendMesh -> 'u' -> (mesh | uv = [mesh.uv ::Vec2(vdata)]);
+    appendMesh -> 'n' -> (mesh | norm = [mesh.norm ::Vec3(vdata)]);
+    appendMesh -> 'f' -> (mesh | faces = [mesh.faces ::Face(fdata)]);
+
+} -> appendMesh(head);
+
+generateMesh = (ctor) {
+    mesh Infinity.Mesh;
+
+};

@@ -1,0 +1,23 @@
+@import impl *;
+@import control *;
+@import std;
+@import math;
+@import console;
+
+_factor =
+    function(value, factors) {
+        [head | tail] = factors;
+        @self -> 1 ? -> [];
+        @self -> rem [] -> [rem];
+    }-> if (std.remainder(value, head) = 0)
+            [value | @self(factors)]
+        else
+            [@self(tail)]
+
+@main {bigint -> int} =
+    function(value) {
+        @assume value > 0;
+        primes = std.filter([2..], math.isPrime);
+        factors = _factor(value, primes);
+        console.log(std.max(factors));
+    } -> 0;

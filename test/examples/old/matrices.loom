@@ -1,0 +1,8 @@
+import builtin*;
+import control*;
+
+textile LinAlg {
+    Matrix : {int int -> *} =
+        n:int m:int fill(fill(0, m),n)
+    
+}

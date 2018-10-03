@@ -1,0 +1,149 @@
+// Mergesort Implementation in YARN
+
+[GLOBAL]
+
+    NL "\n";
+    SPACE " ";
+    MERGESORT_STR "MERGESORT\n";
+    MERGESORT_PAIR_STR "MERGESORT_PAIR_STR";
+    MOO "MOO";
+    FS "FIRST IS SMALLER\n";
+    SS "SECOND IS SMALLER\n";
+
+[TEXT]
+
+:MAIN
+    ASSG {8} (0 0);
+    DECR {8};
+
+    ASSG {24} 8;
+    MUL {24} (8);
+
+    MAKE {16} (24);
+
+    CALL ::GET_ARGUMENTS (0) (16);
+    CALL ::PRINT_ARGUMENTS (16) (8);
+    CALL ::MERGESORT (8) (16);
+    CALL ::PRINT_ARGUMENTS (16) (8);
+
+    FREE (16);
+RETN;
+
+:MERGESORT
+    JLS ::MERGESORT_END (0) 2;
+    JEQ ::MERGESORT_PAIR (0) 2;
+
+    ASSG {24} (0);
+    DIV  {24} 2;
+
+    ASSG {64} (0);
+    ASSG {56} (24);
+    MUL  {64} 8;
+    MUL  {56} 8;
+
+    FANO {128};
+        RPCS {128} ::MERGESORT (24) (8);
+        ASSG {32} (0);
+        SUB  {32} (24);
+        ASSG {40} (8);
+        ADD  {40} (56);
+        RPCS {128} ::MERGESORT (32) (40);
+    FANI {128};
+
+    MAKE {16} (64);
+
+    ASSG {32} 0;
+    ASSG {40} (56);
+    ASSG {48} 0;
+
+    JUMP ::MERGESORT_MERGE_END;
+    :MERGESORT_MERGE
+
+        JLS ::SECOND_IS_SMALLER (8 (40)) (8 (32));
+
+        :FIRST_IS_SMALLER
+            ASSG {16 (48)} (8 (32));
+            ADD {32} 8;
+        JUMP ::MERGESORT_MERGE_INCR;
+
+        :SECOND_IS_SMALLER
+            ASSG {16 (48)} (8 (40));
+            ADD {40} 8;
+        JUMP ::MERGESORT_MERGE_INCR;
+
+        :MERGESORT_MERGE_INCR
+        ADD {48} 8;
+
+    :MERGESORT_MERGE_END
+    JLSE ::MERGESORT_MERGE_CONTINUE (56) (32);
+    JLSE ::MERGESORT_MERGE_CONTINUE (64) (40);
+    JUMP ::MERGESORT_MERGE;
+    :MERGESORT_MERGE_CONTINUE
+
+    JUMP ::ONLY_FIRST_REMAINS_END;
+    :ONLY_FIRST_REMAINS
+        ASSG {16 (48)} (8 (32));
+        ADD {32} 8;
+        ADD {48} 8;
+    :ONLY_FIRST_REMAINS_END
+    JLS ::ONLY_FIRST_REMAINS (32) (56);
+
+    JUMP ::ONLY_SECOND_REMAINS_END;
+    :ONLY_SECOND_REMAINS
+        ASSG {16 (48)} (8 (40));
+        ADD {40} 8;
+        ADD {48} 8;
+    :ONLY_SECOND_REMAINS_END
+    JLS ::ONLY_SECOND_REMAINS (40) (64);
+
+    CALL ::MEMCPY (64) (8) (16);
+
+RETN;
+:MERGESORT_PAIR
+JLSE ::MERGESORT_END (8 0) (8 8);
+    ASSG {16}  (8 0);
+    ASSG {8 0} (8 8);
+    ASSG {8 8} (16);
+:MERGESORT_END
+RETN;
+
+:GET_ARGUMENTS
+    ASSG {16} (0 0);
+    ASSG {24} 2;
+    ASSG {32} (24);
+    ADD {16} 1;
+    MUL {32} 8;
+
+    ASSG {40} (8);
+    JUMP ::GET_ARGUMENTS_LOOP_END;
+    :GET_ARGUMENTS_LOOP
+        SYSC "strtol" {0 (0 (32))} (40);
+        ADD {40} 8;
+        ADD {32} 8;
+        INCR {24};
+    :GET_ARGUMENTS_LOOP_END
+    JLS  ::GET_ARGUMENTS_LOOP (24) (16);
+RETN;
+
+:PRINT_ARGUMENTS
+    ASSG {16} 0;
+    JUMP ::PRINT_ARGS_LOOP_END;
+    :PRINT_ARGS_LOOP
+        ASSG {24} (16);
+        MUL {24} 8;
+        SYSC "print_int" (0 (24));
+        SYSC "print_string" [SPACE];
+        INCR {16};
+    :PRINT_ARGS_LOOP_END
+    JLS ::PRINT_ARGS_LOOP (16) (8);
+    SYSC "print_string" [NL];
+RETN;
+
+:MEMCPY
+    ASSG {24} 0;
+    :MEMCPY_LOOP
+        ASSG {8 (24)} (16 (24));
+        ADD {24} 8;
+    :MEMCPY_LOOP_END
+    JLS ::MEMCPY_LOOP (24) (0);
+RETN;

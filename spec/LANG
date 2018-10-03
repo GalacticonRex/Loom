@@ -1,0 +1,46 @@
+--- OUTDATED ---
+
+// Base Types
+TOKEN  // any string not in quotes in the source code
+STRING // any string in quotes in the source code
+
+// Helper Functions
+COMMA_LIST(expr)
+expr? (','? expr)*
+
+// Declare a type definition
+TYPE
+(TOKEN_DECL | TUPLE_DECL | ARRAY_DECL | TYPE_DECL | FUNC_DECL)
+
+    TOKEN_DECL
+    TOKEN
+
+    TUPLE_DECL
+    '(' COMMA_LIST(TYPE) ')'
+
+    ARRAY_DECL
+    '[' TYPE ']'
+
+    TYPE_DECL
+    ':' TOKEN
+
+    FUNC_DECL
+    '{' COMMA_LIST(TYPE) '->' COMMA_LIST(TYPE) '}'
+
+
+
+A       B          C          D       E
+TYPE -> '('     -> TYPE    -> TYPE -> GO D
+                                   -> ')' .
+                           -> ','  -> TYPE -> GO D
+                                           -> ')' .
+                           -> ')' .
+     -> '['     -> TYPE    -> ']' .
+     -> ':'     -> TOKEN .
+     -> '{'     -> TYPE    -> TYPE -> GO D
+                           -> ','  -> TYPE -> GO D
+                           -> 
+
+                -> '->'    -> TYPE -> TYPE 
+                           -> '}' .
+     -> TOKEN .

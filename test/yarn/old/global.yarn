@@ -1,0 +1,5 @@
+[TEXT]
+SYSC "print_string" [COUNT];
+RETN;
+[GLOBAL]
+COUNT "Count";
